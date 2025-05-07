@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>校园运动器材管理系统</title>
   <style>
     * {
@@ -142,6 +142,129 @@
     .door-closed {
       background-color: #dc3545;
     }
+    
+    /* 响应式设计，适应安卓屏幕 */
+    @media screen and (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      .card {
+        padding: 15px;
+      }
+      .menu {
+        flex-direction: column;
+        gap: 10px;
+      }
+      table, th, td {
+        padding: 8px;
+        font-size: 14px;
+      }
+      .login-tabs {
+        flex-direction: row;
+      }
+      .login-tab {
+        padding: 8px 15px;
+        font-size: 14px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      h3 {
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+
+      /* 异常处理表格在中等屏幕的优化 */
+      #teacher-exception table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+    
+    /* 针对更小屏幕的手机 */
+    @media screen and (max-width: 480px) {
+      .card {
+        padding: 10px;
+      }
+      table, th, td {
+        padding: 6px;
+        font-size: 12px;
+      }
+      .menu button {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+      h1 {
+        font-size: 18px;
+      }
+      h2 {
+        font-size: 16px;
+      }
+      h3 {
+        font-size: 14px;
+      }
+
+      /* 异常处理表格在小屏幕的优化 */
+      #teacher-exception th,
+      #teacher-exception td {
+        padding: 4px;
+        font-size: 11px;
+      }
+    }
+    
+    /* 异常处理表格样式 */
+    #teacher-exception table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    #teacher-exception table tr:hover {
+      background-color: #f1f7ff;
+    }
+    
+    #teacher-exception table th {
+      background-color: #007bff;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    /* 搜索框样式 */
+    .search-container {
+      margin: 15px 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .search-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    
+    @media screen and (max-width: 480px) {
+      .search-input {
+        max-width: 100%;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -257,39 +380,32 @@
       <!-- 异常处理界面 -->
       <div id="teacher-exception" class="tab-panel">
         <h2>归还超时记录</h2>
+        <div class="search-container">
+          <input type="text" id="exception-search" placeholder="搜索..." class="search-input">
+        </div>
         <table>
           <thead>
             <tr>
               <th>学号</th>
               <th>姓名</th>
+              <th>借走日期</th>
+              <th>柜门</th>
               <th>器材</th>
-              <th>借用时间</th>
-              <th>应归还时间</th>
-              <th>实际归还时间</th>
-              <th>超时时长</th>
               <th>状态</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="exception-table-body">
             <tr>
-              <td>2020033</td><td>周八</td><td>跳绳</td>
-              <td>2023-12-05 14:00</td><td>2023-12-05 16:00</td><td>2023-12-05 17:30</td>
-              <td>1小时30分钟</td><td>已处理</td>
+              <td>2020033</td><td>周八</td><td>2023-09-15</td><td>A01</td><td>跳绳</td><td>已处理</td>
             </tr>
             <tr>
-              <td>2020067</td><td>吴九</td><td>乒乓球</td>
-              <td>2023-12-10 09:00</td><td>2023-12-10 11:00</td><td>2023-12-10 13:15</td>
-              <td>2小时15分钟</td><td>未处理</td>
+              <td>2020067</td><td>吴九</td><td>2023-12-10</td><td>B03</td><td>乒乓球</td><td>未处理</td>
             </tr>
             <tr>
-              <td>2020089</td><td>王五</td><td>跳绳</td>
-              <td>2023-12-12 15:30</td><td>2023-12-12 17:30</td><td>2023-12-12 18:00</td>
-              <td>30分钟</td><td>已处理</td>
+              <td>2020089</td><td>王五</td><td>2023-12-12</td><td>A02</td><td>跳绳</td><td>已处理</td>
             </tr>
             <tr>
-              <td>2020021</td><td>郑十</td><td>乒乓球</td>
-              <td>2023-12-15 10:00</td><td>2023-12-15 12:00</td><td>未归还</td>
-              <td>-</td><td>紧急处理</td>
+              <td>2020021</td><td>郑十</td><td>2024-03-05</td><td>C05</td><td>乒乓球</td><td>紧急处理</td>
             </tr>
           </tbody>
         </table>
@@ -573,6 +689,24 @@
         const firstBtn = menu.querySelector('.menu-btn');
         if(firstBtn) firstBtn.click();
       });
+
+      // 异常处理表格搜索功能
+      const exceptionSearch = document.getElementById('exception-search');
+      if (exceptionSearch) {
+        exceptionSearch.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#exception-table-body tr');
+          
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
     });
   </script>
 </body>
