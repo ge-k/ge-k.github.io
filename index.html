@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>校园运动器材管理系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Microsoft YaHei', sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 20px;
+    }
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2, h3 {
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #0069d9;
+    }
+    .hidden {
+      display: none;
+    }
+    .menu {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .menu button {
+      width: auto;
+    }
+    .tab-panel {
+      display: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .login-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .login-tab {
+      padding: 10px 20px;
+      border: none;
+      background-color: #f1f1f1;
+      cursor: pointer;
+      border-radius: 5px 5px 0 0;
+      margin: 0 5px;
+      font-weight: bold;
+      flex: 1;
+      max-width: 150px;
+    }
+    .login-tab.active {
+      background-color: #007bff;
+      color: white;
+    }
+    .login-panel {
+      padding: 20px;
+      border-radius: 5px;
+      background-color: #ffffff;
+    }
+    .device-info {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border: 1px solid #e9ecef;
+    }
+    .device-info p {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    .result {
+      font-size: 18px;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .door-control {
+      display: flex;
+      margin-top: 20px;
+    }
+    .door-open {
+      background-color: #28a745;
+    }
+    .door-closed {
+      background-color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 登录界面 -->
+    <div id="login-section" class="card">
+      <h1>校园运动器材管理系统</h1>
+      <div class="login-tabs">
+        <button id="student-tab" class="login-tab active">学生登录</button>
+        <button id="teacher-tab" class="login-tab">教师登录</button>
+      </div>
+      
+      <div id="student-login" class="login-panel">
+        <div class="form-group">
+          <label for="student-username">账号</label>
+          <input type="text" id="student-username" value="210797">
+        </div>
+        <div class="form-group">
+          <label for="student-password">密码</label>
+          <input type="password" id="student-password" value="210797">
+        </div>
+        <button id="student-login-btn">登录</button>
+      </div>
+      
+      <div id="teacher-login" class="login-panel hidden">
+        <div class="form-group">
+          <label for="teacher-username">账号</label>
+          <input type="text" id="teacher-username" value="359921">
+        </div>
+        <div class="form-group">
+          <label for="teacher-password">密码</label>
+          <input type="password" id="teacher-password" value="359921">
+        </div>
+        <button id="teacher-login-btn">登录</button>
+      </div>
+    </div>
+
+    <!-- 学生功能界面 -->
+    <div id="student-dashboard" class="card hidden">
+      <h1>学生功能界面</h1>
+      <div class="menu">
+        <button class="menu-btn" data-target="student-history">历史记录</button>
+        <button class="menu-btn" data-target="student-qrcode">查看二维码</button>
+        <button id="student-logout">退出登录</button>
+      </div>
+
+      <!-- 历史记录界面 -->
+      <div id="student-history" class="tab-panel">
+        <h2>历史使用记录</h2>
+        <div>一年总使用时长: <span id="total-year-hours">78</span> 小时</div>
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>器材</th>
+              <th>使用时长 (小时)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2023-01-15</td><td>跳绳</td><td>2</td></tr>
+            <tr><td>2023-02-20</td><td>乒乓球</td><td>3</td></tr>
+            <tr><td>2023-03-10</td><td>跳绳</td><td>1.5</td></tr>
+            <tr><td>2023-04-05</td><td>乒乓球</td><td>2.5</td></tr>
+            <tr><td>2023-05-12</td><td>跳绳</td><td>2</td></tr>
+            <tr><td>2023-06-20</td><td>乒乓球</td><td>4</td></tr>
+            <tr><td>2023-07-08</td><td>跳绳</td><td>3</td></tr>
+            <tr><td>2023-08-15</td><td>乒乓球</td><td>2</td></tr>
+            <tr><td>2023-09-23</td><td>跳绳</td><td>1</td></tr>
+            <tr><td>2023-10-10</td><td>乒乓球</td><td>3</td></tr>
+            <tr><td>2023-11-05</td><td>跳绳</td><td>2</td></tr>
+            <tr><td>2023-12-20</td><td>乒乓球</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 二维码界面 -->
+      <div id="student-qrcode" class="tab-panel">
+        <h2>学生二维码</h2>
+        <div style="text-align: center; margin: 20px 0;">
+          <p style="margin-bottom: 15px; font-size: 18px;">个人识别二维码</p>
+          <div>
+            <img id="qrcode-image" alt="学生二维码" style="border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          </div>
+          <p style="margin-top: 15px; color: #666; font-size: 14px;">请在设备前出示此二维码</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 教师功能界面 -->
+    <div id="teacher-dashboard" class="card hidden">
+      <h1>教师功能界面</h1>
+      <div class="menu">
+        <button class="menu-btn" data-target="teacher-door">开关门柜</button>
+        <button class="menu-btn" data-target="teacher-exception">异常处理</button>
+        <button id="teacher-logout">退出登录</button>
+      </div>
+
+      <!-- 开关门柜界面 -->
+      <div id="teacher-door" class="tab-panel">
+        <h2>开关门柜管理</h2>
+        <div class="form-group door-control">
+          <button id="door-toggle" style="width: 120px;">加载中...</button>
+        </div>
+        
+        <div class="device-info">
+          <h3>设备状态</h3>
+          <p class="result" id="lock-status">门状态: 查询中...</p>
+          <p class="result" id="device-password">密码: 查询中...</p>
+          <p class="result" id="last-update-time">最后更新时间: 查询中...</p>
+        </div>
+      </div>
+
+      <!-- 异常处理界面 -->
+      <div id="teacher-exception" class="tab-panel">
+        <h2>归还超时记录</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>学号</th>
+              <th>姓名</th>
+              <th>器材</th>
+              <th>借用时间</th>
+              <th>应归还时间</th>
+              <th>实际归还时间</th>
+              <th>超时时长</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2020033</td><td>周八</td><td>跳绳</td>
+              <td>2023-12-05 14:00</td><td>2023-12-05 16:00</td><td>2023-12-05 17:30</td>
+              <td>1小时30分钟</td><td>已处理</td>
+            </tr>
+            <tr>
+              <td>2020067</td><td>吴九</td><td>乒乓球</td>
+              <td>2023-12-10 09:00</td><td>2023-12-10 11:00</td><td>2023-12-10 13:15</td>
+              <td>2小时15分钟</td><td>未处理</td>
+            </tr>
+            <tr>
+              <td>2020089</td><td>王五</td><td>跳绳</td>
+              <td>2023-12-12 15:30</td><td>2023-12-12 17:30</td><td>2023-12-12 18:00</td>
+              <td>30分钟</td><td>已处理</td>
+            </tr>
+            <tr>
+              <td>2020021</td><td>郑十</td><td>乒乓球</td>
+              <td>2023-12-15 10:00</td><td>2023-12-15 12:00</td><td>未归还</td>
+              <td>-</td><td>紧急处理</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 登录标签页切换
+      document.getElementById('student-tab').addEventListener('click', () => toggleLoginPanels('student'));
+      document.getElementById('teacher-tab').addEventListener('click', () => toggleLoginPanels('teacher'));
+      
+      function toggleLoginPanels(userType) {
+        const isStudent = userType === 'student';
+        document.getElementById('student-login').classList.toggle('hidden', !isStudent);
+        document.getElementById('teacher-login').classList.toggle('hidden', isStudent);
+        document.getElementById('student-tab').classList.toggle('active', isStudent);
+        document.getElementById('teacher-tab').classList.toggle('active', !isStudent);
+      }
+      
+      // 登录功能
+      document.getElementById('student-login-btn').addEventListener('click', () => login('student'));
+      document.getElementById('teacher-login-btn').addEventListener('click', () => login('teacher'));
+      
+      function login(userType) {
+        const username = document.getElementById(userType + '-username').value;
+        const password = document.getElementById(userType + '-password').value;
+        
+        const credentials = {
+          student: {username: '210797', password: '210797'},
+          teacher: {username: '359921', password: '359921'}
+        };
+        
+        if (username === credentials[userType].username && 
+            password === credentials[userType].password) {
+          document.getElementById('login-section').classList.add('hidden');
+          document.getElementById(userType + '-dashboard').classList.remove('hidden');
+          
+          // 默认显示第一个功能界面
+          const firstMenuBtn = document.querySelector('#' + userType + '-dashboard .menu-btn');
+          if (firstMenuBtn) firstMenuBtn.click();
+        } else {
+          alert(userType === 'student' ? '学生账号或密码错误!' : '教师账号或密码错误!');
+        }
+      }
+
+      // 退出登录
+      document.getElementById('student-logout').addEventListener('click', () => logout('student'));
+      document.getElementById('teacher-logout').addEventListener('click', () => logout('teacher'));
+      
+      function logout(userType) {
+        document.getElementById(userType + '-dashboard').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById(userType + '-tab').click();
+        
+        if (userType === 'teacher' && window.statusInterval) {
+          clearInterval(window.statusInterval);
+          window.statusInterval = null;
+        }
+      }
+
+      // 菜单切换功能
+      document.querySelectorAll('.menu-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const targetId = this.getAttribute('data-target');
+          const dashboard = this.closest('.card');
+          
+          dashboard.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.style.display = 'none';
+          });
+          
+          if(targetId) {
+            document.getElementById(targetId).style.display = 'block';
+            
+            if(targetId === 'teacher-door') {
+              queryDeviceStatus();
+            } else if(targetId === 'student-qrcode') {
+              loadStudentQRCode();
+            }
+          }
+        });
+      });
+
+      // OneNet物联网平台API配置
+      const oneNetConfig = {
+        productId: '56i5KnK1KX',
+        deviceName: 'ch32',
+        authorization: 'version=2018-10-31&res=products%2F56i5KnK1KX%2Fdevices%2Fch32&et=1767233340&method=md5&sign=xTIiV6aZQvvpq1yJti58tQ%3D%3D',
+        queryPropertyUrl: 'https://iot-api.heclouds.com/thingmodel/query-device-property',
+        setPropertyUrl: 'https://iot-api.heclouds.com/thingmodel/set-device-desired-property'
+      };
+      
+      // 设备状态变量
+      let deviceStatus = {
+        isLocked: true,
+        password: '',
+        lastUpdateTime: ''
+      };
+      
+      // 查询设备状态
+      async function queryDeviceStatus() {
+        try {
+          const url = `${oneNetConfig.queryPropertyUrl}?product_id=${oneNetConfig.productId}&device_name=${oneNetConfig.deviceName}`;
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': oneNetConfig.authorization
+            }
+          });
+          
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          
+          const data = await response.json();
+          
+          if (data.errno === 0 || data.code === 0) {
+            let properties = [];
+            
+            if (data.data) {
+              if (Array.isArray(data.data.list)) properties = data.data.list;
+              else if (Array.isArray(data.data.properties)) properties = data.data.properties;
+              else if (data.data.list) properties = data.data.list;
+              else if (Array.isArray(data.data)) properties = data.data;
+            }
+            
+            deviceStatus.lastUpdateTime = new Date().toLocaleString();
+            
+            // 查找Lock和password属性
+            const lockProperty = properties.find(prop => prop.identifier === 'Lock' || prop.identifier === 'lock');
+            const passwordProperty = properties.find(prop => prop.identifier === 'password');
+            
+            if (lockProperty) {
+              const value = lockProperty.value;
+              if (typeof value === 'boolean') deviceStatus.isLocked = value;
+              else if (value === 'true' || value === 'false') deviceStatus.isLocked = (value === 'true');
+              else if (value === '1' || value === '0') deviceStatus.isLocked = (value === '1');
+              else if (value === 1 || value === 0) deviceStatus.isLocked = (value === 1);
+              else deviceStatus.isLocked = Boolean(value);
+              
+              document.getElementById('lock-status').textContent = `门状态: ${deviceStatus.isLocked ? '已关门 (Lock = true)' : '已开门 (Lock = false)'}`;
+            } else {
+              document.getElementById('lock-status').textContent = '门状态: 未找到数据';
+            }
+            
+            if (passwordProperty) {
+              deviceStatus.password = passwordProperty.value || '未设置';
+              document.getElementById('device-password').textContent = `密码: ${deviceStatus.password}`;
+            } else {
+              document.getElementById('device-password').textContent = '密码: 未找到数据';
+            }
+            
+            document.getElementById('last-update-time').textContent = `最后更新时间: ${deviceStatus.lastUpdateTime}`;
+            updateDeviceStatusUI();
+            return true;
+          } else {
+            throw new Error(data.error || data.msg || '查询失败');
+          }
+        } catch (error) {
+          console.error('查询设备状态失败:', error);
+          document.getElementById('lock-status').textContent = '门状态: 查询出错';
+          document.getElementById('device-password').textContent = '密码: 查询出错';
+          return false;
+        }
+      }
+      
+      // 设置设备锁状态
+      async function setDeviceLockStatus(isLocked) {
+        try {
+          const doorToggleBtn = document.getElementById('door-toggle');
+          doorToggleBtn.disabled = true;
+          
+          const requestData = {
+            product_id: oneNetConfig.productId,
+            device_name: oneNetConfig.deviceName,
+            params: { Lock: isLocked }
+          };
+          
+          const response = await fetch(oneNetConfig.setPropertyUrl, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': oneNetConfig.authorization
+            },
+            body: JSON.stringify(requestData)
+          });
+          
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          
+          const data = await response.json();
+          
+          if (data.errno === 0 || data.code === 0) {
+            deviceStatus.isLocked = isLocked;
+            deviceStatus.lastUpdateTime = new Date().toLocaleString();
+            
+            document.getElementById('lock-status').textContent = `门状态: ${deviceStatus.isLocked ? '已关门 (Lock = true)' : '已开门 (Lock = false)'}`;
+            document.getElementById('last-update-time').textContent = `最后更新时间: ${deviceStatus.lastUpdateTime}`;
+            
+            updateDeviceStatusUI();
+            setTimeout(() => queryDeviceStatus(), 2000);
+            
+            return true;
+          } else {
+            throw new Error(data.error || data.msg || '设置失败');
+          }
+        } catch (error) {
+          console.error('设置门锁状态失败:', error);
+          document.getElementById('lock-status').textContent = '门状态: 设置失败';
+          return false;
+        } finally {
+          document.getElementById('door-toggle').disabled = false;
+        }
+      }
+      
+      // 更新设备状态界面
+      function updateDeviceStatusUI() {
+        const doorToggleBtn = document.getElementById('door-toggle');
+        doorToggleBtn.textContent = deviceStatus.isLocked ? '已关门' : '已开门';
+        doorToggleBtn.classList.remove('door-open', 'door-closed');
+        doorToggleBtn.classList.add(deviceStatus.isLocked ? 'door-closed' : 'door-open');
+      }
+      
+      // 开关门柜功能
+      document.getElementById('door-toggle').addEventListener('click', async function() {
+        this.disabled = true;
+        await setDeviceLockStatus(!deviceStatus.isLocked);
+      });
+      
+      // 教师登录后初始化设备状态
+      const originalLogin = login;
+      login = function(userType) {
+        const result = originalLogin(userType);
+        if (userType === 'teacher') {
+          setTimeout(async () => {
+            try {
+              document.getElementById('door-toggle').disabled = true;
+              await queryDeviceStatus();
+              
+              // 设置定时查询，每1秒更新一次设备状态
+              if (!window.statusInterval) {
+                window.statusInterval = setInterval(() => {
+                  if (document.getElementById('teacher-door').style.display === 'block') {
+                    queryDeviceStatus();
+                  }
+                }, 1000);
+              }
+            } catch (e) {
+              console.error("初始化门锁状态失败:", e);
+              deviceStatus.isLocked = true;
+              deviceStatus.lastUpdateTime = new Date().toLocaleString();
+              updateDeviceStatusUI();
+            } finally {
+              document.getElementById('door-toggle').disabled = false;
+            }
+          }, 500);
+        }
+        return result;
+      };
+      
+      // 加载学生二维码
+      function loadStudentQRCode() {
+        const studentUsername = document.getElementById('student-username').value || '210797';
+        document.getElementById('qrcode-image').src = 
+          `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${studentUsername}`;
+      }
+      
+      // 学生登录成功后预加载二维码
+      const studentLoginBtn = document.getElementById('student-login-btn');
+      const originalStudentLoginClick = studentLoginBtn.onclick;
+      studentLoginBtn.onclick = function() {
+        if (originalStudentLoginClick) originalStudentLoginClick.call(this);
+        else login('student');
+        setTimeout(loadStudentQRCode, 500);
+      };
+      
+      // 初始化 - 点击第一个菜单按钮
+      document.querySelectorAll('.menu').forEach(menu => {
+        const firstBtn = menu.querySelector('.menu-btn');
+        if(firstBtn) firstBtn.click();
+      });
+    });
+  </script>
+</body>
+</html> 
