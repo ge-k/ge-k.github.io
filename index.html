@@ -172,6 +172,15 @@
         padding: 10px 15px;
         font-size: 14px;
       }
+      
+      #login-section h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      
+      #login-section h1 {
+        font-size: 22px;
+      }
 
       /* 异常处理表格在中等屏幕的优化 */
       #teacher-exception table {
@@ -202,6 +211,15 @@
       }
       h3 {
         font-size: 14px;
+      }
+      
+      #login-section h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      
+      #login-section h1 {
+        font-size: 20px;
       }
 
       /* 异常处理表格在小屏幕的优化 */
@@ -277,13 +295,31 @@
       color: #28a745;
       background-color: rgba(40, 167, 69, 0.1);
     }
+
+    /* 添加动画关键帧 */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+      from { 
+        transform: translateY(-10px);
+        opacity: 0;
+      }
+      to { 
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- 登录界面 -->
     <div id="login-section" class="card">
-      <h1>校园运动器材管理系统</h1>
+      <h3 style="color: #007bff; font-family: 'Microsoft YaHei', sans-serif; margin-bottom: 15px; font-weight: 600; text-align: center; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,123,255,0.2); font-size: 22px; background: linear-gradient(45deg, #007bff, #00a8ff); -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent; padding: 5px; animation: fadeIn 1.5s ease-in-out;">2025共创芯未来</h3>
+      <h1 style="font-size: 28px; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); animation: slideIn 1s ease-out;">校园运动器材管理系统</h1>
       <div class="login-tabs">
         <button id="student-tab" class="login-tab active">学生登录</button>
         <button id="teacher-tab" class="login-tab">教师登录</button>
@@ -369,6 +405,7 @@
       <div class="menu">
         <button class="menu-btn" data-target="teacher-door">开关门柜</button>
         <button class="menu-btn" data-target="teacher-exception">异常处理</button>
+        <button class="menu-btn" data-target="teacher-qrcode">查看二维码</button>
         <button id="teacher-logout">退出登录</button>
       </div>
 
@@ -405,32 +442,54 @@
           </thead>
           <tbody id="exception-table-body">
             <tr>
-              <td>210890</td><td>王一</td><td id="current-month-date-1"></td><td>1</td><td>乒乓球</td><td class="status-cell" data-status="pending">未处理</td>
+              <td>175905</td><td>孙八</td><td id="current-month-date-1"></td><td>2</td><td>乒乓球</td><td class="status-cell" data-status="pending">未处理</td>
             </tr>
             <tr>
-              <td>210667</td><td>王五</td><td id="current-month-date-2"></td><td>2</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
+              <td>210890</td><td>王一</td><td id="current-month-date-2"></td><td>1</td><td>乒乓球</td><td class="status-cell" data-status="pending">未处理</td>
             </tr>
             <tr>
-              <td>210333</td><td>吴九</td><td id="current-month-date-3"></td><td>3</td><td>乒乓球</td><td class="status-cell" data-status="done">已处理</td>
+              <td>210667</td><td>王五</td><td id="current-month-date-3"></td><td>2</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
             </tr>
             <tr>
-              <td>210456</td><td>周八</td><td id="current-month-date-4"></td><td>1</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
+              <td>210333</td><td>吴九</td><td id="current-month-date-4"></td><td>3</td><td>乒乓球</td><td class="status-cell" data-status="done">已处理</td>
+            </tr>
+            <tr>
+              <td>210456</td><td>周八</td><td id="current-month-date-5"></td><td>1</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 教师二维码界面 -->
+      <div id="teacher-qrcode" class="tab-panel">
+        <h2>教师二维码</h2>
+        <div style="text-align: center; margin: 20px 0;">
+          <p style="margin-bottom: 15px; font-size: 18px;">教师识别二维码</p>
+          <div>
+            <img id="teacher-qrcode-image" alt="教师二维码" style="border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          </div>
+          <p style="margin-top: 15px; color: #666; font-size: 14px;">请在设备前出示此二维码</p>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // 设置默认账号密码
+      document.getElementById('student-username').value = '210797';
+      document.getElementById('student-password').value = '210797';
+      document.getElementById('teacher-username').value = '359921';
+      document.getElementById('teacher-password').value = '359921';
+      
       // 设备状态变量
       let deviceVariables = {
-        use_flag: false,  // 使用标志
-        ping_pong: false, // 器材类型（false表示跳绳，true表示乒乓球）
-        use_time: 0,      // 使用时长
-        error_flag: 0, // 异常处理标志，整数类型，0表示无异常，非0表示账号
-        cabinet: 0        // 柜子编号
+        use_flag: false,
+        ping_pong: false,
+        use_time: 0,
+        error_flag: 0,
+        cabinet: 0,
+        lock: false
       };
       
       // OneNet物联网平台API配置
@@ -444,40 +503,30 @@
       
       // 更新异常处理界面的借走日期为当月日期
       function updateExceptionDates() {
-        // 获取当前年月日
         const today = new Date();
         const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth() + 1; // 月份从0开始，需要+1
-        const currentDay = today.getDate(); // 今天的日期
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
         
-        // 为每个日期单元格设置当月的日期，且不超过今天
         const date1 = document.getElementById('current-month-date-1');
         const date2 = document.getElementById('current-month-date-2');
         const date3 = document.getElementById('current-month-date-3');
         const date4 = document.getElementById('current-month-date-4');
+        const date5 = document.getElementById('current-month-date-5');
         
-        // 确保日期递减（倒序排列，最近的日期在最上面）
-        // 最近的日期，不超过今天
         const day1 = currentDay;
-        
-        // 今天减少几天
-        const day2 = Math.max(1, currentDay - 3); 
-        
-        // 更早的日期
-        const day3 = Math.max(1, currentDay - 7); 
-        
-        // 最早的日期
-        const day4 = Math.max(1, currentDay - 12); 
+        const day2 = Math.max(1, currentDay - 3);
+        const day3 = Math.max(1, currentDay - 7);
+        const day4 = Math.max(1, currentDay - 12);
+        const day5 = Math.max(1, currentDay - 14);
         
         if (date1) date1.textContent = formatDate(currentYear, currentMonth, day1);
         if (date2) date2.textContent = formatDate(currentYear, currentMonth, day2);
         if (date3) date3.textContent = formatDate(currentYear, currentMonth, day3);
         if (date4) date4.textContent = formatDate(currentYear, currentMonth, day4);
+        if (date5) date5.textContent = formatDate(currentYear, currentMonth, day5);
         
-        // 更新状态：当日之前的记录状态改为"已处理"
         updatePastRecordsStatus();
-        
-        console.log(`已更新异常处理界面的时期（倒序）：${day1}, ${day2}, ${day3}, ${day4}`);
       }
       
       // 更新过去记录的状态
@@ -486,19 +535,18 @@
         if (!exceptionTableBody) return;
         
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // 设置为今天的开始时间
+        today.setHours(0, 0, 0, 0);
         
         const rows = exceptionTableBody.querySelectorAll('tr');
         rows.forEach(row => {
-          const dateCell = row.cells[2]; // 时期单元格
-          const statusCell = row.cells[5]; // 状态单元格
+          const dateCell = row.cells[2];
+          const statusCell = row.cells[5];
           
           if (dateCell && statusCell) {
             const dateStr = dateCell.textContent;
             const recordDate = new Date(dateStr);
             recordDate.setHours(0, 0, 0, 0);
             
-            // 如果是过去的日期（早于今天），将状态设置为"已处理"
             if (recordDate < today) {
               statusCell.textContent = "已处理";
               statusCell.setAttribute('data-status', 'done');
@@ -507,7 +555,7 @@
         });
       }
       
-      // 辅助函数：将各种值转换为布尔值
+      // 辅助函数
       function convertToBoolean(value) {
         if (typeof value === 'boolean') return value;
         if (value === 'true' || value === '1' || value === 1) return true;
@@ -515,7 +563,6 @@
         return Boolean(value);
       }
       
-      // 获取当前日期字符串（年-月-日格式）
       function getCurrentDateString() {
         const today = new Date();
         return today.getFullYear() + '-' + 
@@ -523,38 +570,48 @@
                String(today.getDate()).padStart(2, '0');
       }
       
-      // 格式化日期为YYYY-MM-DD格式
       function formatDate(year, month, day) {
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       }
       
       // 初始化调用
-      // 在DOM加载完成时更新异常处理界面日期
       updateExceptionDates();
       
-      // 当切换到异常处理界面时更新日期
+      // 界面切换事件
       document.querySelectorAll('.menu-btn').forEach(button => {
         button.addEventListener('click', function() {
           const targetId = this.getAttribute('data-target');
-          if (targetId === 'teacher-exception') {
-            // 更新日期和设备状态
-            setTimeout(() => {
-              updateExceptionDates();
+          const dashboard = this.closest('.card');
+          
+          dashboard.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.style.display = 'none';
+          });
+          
+          if(targetId) {
+            document.getElementById(targetId).style.display = 'block';
+            
+            if(targetId === 'teacher-door') {
+              queryDeviceStatus();
+            } else if(targetId === 'student-qrcode') {
+              loadStudentQRCode();
+            } else if(targetId === 'teacher-qrcode') {
+              loadTeacherQRCode();
+            } else if(targetId === 'teacher-exception') {
+              setTimeout(() => {
+                updateExceptionDates();
+                fetchDeviceVariables();
+              }, 100);
+            } else if(targetId === 'student-history') {
+              document.getElementById('student-history').style.display = 'block';
               fetchDeviceVariables();
-            }, 100);
+            }
           }
         });
       });
       
-      // 设置定时器，每秒更新一次设备变量
+      // 设备状态查询
       const deviceStatusInterval = setInterval(fetchDeviceVariables, 1000);
-      
-      // 初始查询一次
-      fetchDeviceVariables().then(() => {
-        console.log('初始设备状态查询完成');
-      }).catch(err => {
-        console.error('初始设备状态查询失败:', err);
-      });
+      fetchDeviceVariables();
       
       // 从OneNet API获取设备变量
       async function fetchDeviceVariables() {
@@ -574,7 +631,6 @@
           const data = await response.json();
           
           if (data.code === 0 && data.data) {
-            // 获取设备属性列表
             let properties = [];
             
             if (data.data && data.data.list) {
@@ -583,18 +639,16 @@
               properties = data.data;
             }
             
-            // 查找各种设备属性
+            const oldUseFlag = deviceVariables.use_flag;
+            const oldErrorFlag = deviceVariables.error_flag;
+            
             const useFlagProperty = properties.find(prop => prop.identifier === 'use_flag');
             const pingPongProperty = properties.find(prop => prop.identifier === 'ping_pong');
             const useTimeProperty = properties.find(prop => prop.identifier === 'use_time');
             const errorFlagProperty = properties.find(prop => prop.identifier === 'error_flag');
             const cabinetProperty = properties.find(prop => prop.identifier === 'cabinet');
+            const lockProperty = properties.find(prop => prop.identifier === 'Lock' || prop.identifier === 'lock');
             
-            // 保存旧值用于比较
-            const oldUseFlag = deviceVariables.use_flag;
-            const oldErrorFlag = deviceVariables.error_flag;
-            
-            // 更新设备变量
             if (useFlagProperty) {
               deviceVariables.use_flag = convertToBoolean(useFlagProperty.value);
             }
@@ -615,14 +669,16 @@
               deviceVariables.cabinet = parseInt(cabinetProperty.value) || 0;
             }
             
-            // 当error_flag发生任何变化时，在归还超时记录界面插入新记录
+            if (lockProperty) {
+              deviceVariables.lock = convertToBoolean(lockProperty.value);
+              updateLockDisplay(deviceVariables.lock);
+            }
+            
             if (oldErrorFlag !== deviceVariables.error_flag && deviceVariables.error_flag !== 0) {
               insertExceptionRecord();
             }
             
             const currentDateStr = getCurrentDateString();
-            
-            // 处理历史记录界面
             const historyTableBody = document.getElementById('history-table-body');
             
             if (historyTableBody) {
@@ -650,9 +706,8 @@
         }
       }
       
-      // 查找当天的记录行
+      // 历史记录相关函数
       function findTodayRow(tableBody, dateStr) {
-        // 查找是否已存在当天日期的行
         for (let i = 0; i < tableBody.rows.length; i++) {
           const row = tableBody.rows[i];
           const dateCell = row.cells[0];
@@ -663,88 +718,60 @@
         return null;
       }
       
-      // 更新历史记录行
       function updateHistoryRow(row) {
         if (!row) return;
         
-        // 更新器材类型 - ping_pong为true代表乒乓球，false代表跳绳
         const equipmentCell = row.cells[1];
         const equipment = deviceVariables.ping_pong ? '乒乓球' : '跳绳';
         if (equipmentCell.textContent !== equipment) {
           equipmentCell.textContent = equipment;
         }
         
-        // 更新使用时长
         const durationCell = row.cells[2];
         if (parseFloat(durationCell.textContent) !== deviceVariables.use_time) {
           durationCell.textContent = deviceVariables.use_time;
-          
-          // 更新总使用时长
           updateTotalHours();
         }
       }
       
-      // 插入新的历史记录
       function insertNewHistoryRecord(dateStr) {
         const historyTableBody = document.getElementById('history-table-body');
+        if (!historyTableBody) return null;
         
-        if (!historyTableBody) {
-          console.error('找不到历史记录表格体');
-          return null;
-        }
+        if (!dateStr) dateStr = getCurrentDateString();
         
-        // 如果没有提供日期，使用当前日期
-        if (!dateStr) {
-          dateStr = getCurrentDateString();
-        }
-        
-        // 再次检查是否已存在该日期的记录，避免重复
         const existingRow = findTodayRow(historyTableBody, dateStr);
         if (existingRow) {
-          // 已存在，只更新内容
           updateHistoryRow(existingRow);
           return existingRow;
         }
         
-        // 确定器材类型 - ping_pong为true代表乒乓球，false代表跳绳
         const equipment = deviceVariables.ping_pong ? '乒乓球' : '跳绳';
-        
-        // 创建新行
         const newRow = document.createElement('tr');
-        
-        // 设置行内容
         newRow.innerHTML = `<td>${dateStr}</td><td>${equipment}</td><td>${deviceVariables.use_time}</td>`;
         
-        // 插入到表格顶部
         if (historyTableBody.firstChild) {
           historyTableBody.insertBefore(newRow, historyTableBody.firstChild);
         } else {
           historyTableBody.appendChild(newRow);
         }
         
-        // 更新总使用时长
         updateTotalHours();
-        
         return newRow;
       }
       
-      // 更新总使用时长
       function updateTotalHours() {
         const totalHoursElement = document.getElementById('total-year-hours');
         if (!totalHoursElement) return;
         
-        // 获取表格中所有的使用时长
         const hours = Array.from(document.querySelectorAll('#student-history tbody td:nth-child(3)'))
           .map(td => parseFloat(td.textContent) || 0);
         
-        // 计算总和
         const totalHours = hours.reduce((sum, hour) => sum + hour, 0);
-        
-        // 更新显示
         totalHoursElement.textContent = totalHours.toFixed(1);
       }
       
-      // 登录标签页切换
+      // 登录切换和验证
       document.getElementById('student-tab').addEventListener('click', () => toggleLoginPanels('student'));
       document.getElementById('teacher-tab').addEventListener('click', () => toggleLoginPanels('teacher'));
       
@@ -756,7 +783,11 @@
         document.getElementById('teacher-tab').classList.toggle('active', !isStudent);
       }
       
-      // 登录功能
+      let currentLogin = {
+        student: { username: '210797', password: '210797' },
+        teacher: { username: '359921', password: '359921' }
+      };
+      
       document.getElementById('student-login-btn').addEventListener('click', () => login('student'));
       document.getElementById('teacher-login-btn').addEventListener('click', () => login('teacher'));
       
@@ -771,34 +802,32 @@
           '175908': {type: 'student', password: '175908'}
         };
         
-        // 验证登录
         let loginSuccess = false;
         let dashboardType = '';
         
-        // 标准学生账号登录
         if (userType === 'student' && username === credentials.student.username && 
             password === credentials.student.password) {
           loginSuccess = true;
           dashboardType = 'student';
+          currentLogin.student = { username, password };
         } 
-        // 标准教师账号登录
         else if (userType === 'teacher' && username === credentials.teacher.username && 
             password === credentials.teacher.password) {
           loginSuccess = true;
           dashboardType = 'teacher';
+          currentLogin.teacher = { username, password };
         } 
-        // 其他学生账号登录
         else if (credentials[username] && credentials[username].type === 'student' && 
             credentials[username].password === password) {
           loginSuccess = true;
           dashboardType = 'student';
+          currentLogin.student = { username, password };
         }
         
         if (loginSuccess) {
           document.getElementById('login-section').classList.add('hidden');
           document.getElementById(dashboardType + '-dashboard').classList.remove('hidden');
           
-          // 默认显示第一个功能界面
           const firstMenuBtn = document.querySelector('#' + dashboardType + '-dashboard .menu-btn');
           if (firstMenuBtn) firstMenuBtn.click();
         } else {
@@ -806,7 +835,6 @@
         }
       }
 
-      // 退出登录
       document.getElementById('student-logout').addEventListener('click', () => logout('student'));
       document.getElementById('teacher-logout').addEventListener('click', () => logout('teacher'));
       
@@ -814,53 +842,23 @@
         document.getElementById(userType + '-dashboard').classList.add('hidden');
         document.getElementById('login-section').classList.remove('hidden');
         
-        // 重置登录表单
         if (userType === 'student') {
           document.getElementById('student-tab').click();
-          document.getElementById('student-username').value = '';
-          document.getElementById('student-password').value = '';
+          document.getElementById('student-username').value = currentLogin.student.username;
+          document.getElementById('student-password').value = currentLogin.student.password;
         } else {
           document.getElementById('teacher-tab').click();
-          document.getElementById('teacher-username').value = '';
-          document.getElementById('teacher-password').value = '';
+          document.getElementById('teacher-username').value = currentLogin.teacher.username;
+          document.getElementById('teacher-password').value = currentLogin.teacher.password;
         }
       }
 
-      // 菜单切换功能
-      document.querySelectorAll('.menu-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const targetId = this.getAttribute('data-target');
-          const dashboard = this.closest('.card');
-          
-          dashboard.querySelectorAll('.tab-panel').forEach(panel => {
-            panel.style.display = 'none';
-          });
-          
-          if(targetId) {
-            document.getElementById(targetId).style.display = 'block';
-            
-            if(targetId === 'teacher-door') {
-              queryDeviceStatus();
-            } else if(targetId === 'student-qrcode') {
-              loadStudentQRCode();
-            } else if(targetId === 'student-history') {
-              // 加载历史记录时，确保历史记录面板可见
-              console.log('切换到历史记录界面');
-              document.getElementById('student-history').style.display = 'block';
-              // 立即检查一次设备状态
-              fetchDeviceVariables();
-            }
-          }
-        });
-      });
-
-      // 设备状态变量
+      // 设备状态和控制
       let deviceStatus = {
         isLocked: true,
         lastUpdateTime: ''
       };
       
-      // 查询设备状态
       async function queryDeviceStatus() {
         try {
           const url = `${config.queryApiUrl}?product_id=${encodeURIComponent(config.productId)}&device_name=${encodeURIComponent(config.deviceName)}`;
@@ -888,24 +886,15 @@
             
             deviceStatus.lastUpdateTime = new Date().toLocaleString();
             
-            // 查找Lock属性
             const lockProperty = properties.find(prop => prop.identifier === 'Lock' || prop.identifier === 'lock');
             
             if (lockProperty) {
-              const value = lockProperty.value;
-              if (typeof value === 'boolean') deviceStatus.isLocked = value;
-              else if (value === 'true' || value === 'false') deviceStatus.isLocked = (value === 'true');
-              else if (value === '1' || value === '0') deviceStatus.isLocked = (value === '1');
-              else if (value === 1 || value === 0) deviceStatus.isLocked = (value === 1);
-              else deviceStatus.isLocked = Boolean(value);
-              
-              document.getElementById('lock-status').textContent = `门状态: ${deviceStatus.isLocked ? '已关门 (Lock = true)' : '已开门 (Lock = false)'}`;
-            } else {
-              document.getElementById('lock-status').textContent = '门状态: 未找到数据';
+              const lockValue = lockProperty.value;
+              deviceStatus.isLocked = Boolean(lockValue);
+              updateLockDisplay(deviceStatus.isLocked);
             }
             
             document.getElementById('last-update-time').textContent = `最后更新时间: ${deviceStatus.lastUpdateTime}`;
-            updateDeviceStatusUI();
             return true;
           } else {
             throw new Error(data.error || data.msg || '查询失败');
@@ -917,7 +906,6 @@
         }
       }
       
-      // 设置设备锁状态
       async function setDeviceLockStatus(isLocked) {
         try {
           const doorToggleBtn = document.getElementById('door-toggle');
@@ -947,10 +935,13 @@
             deviceStatus.isLocked = isLocked;
             deviceStatus.lastUpdateTime = new Date().toLocaleString();
             
-            document.getElementById('lock-status').textContent = `门状态: ${deviceStatus.isLocked ? '已关门 (Lock = true)' : '已开门 (Lock = false)'}`;
-            document.getElementById('last-update-time').textContent = `最后更新时间: ${deviceStatus.lastUpdateTime}`;
+            updateLockDisplay(isLocked);
             
-            updateDeviceStatusUI();
+            const lastUpdateTimeElement = document.getElementById('last-update-time');
+            if (lastUpdateTimeElement) {
+              lastUpdateTimeElement.textContent = `最后更新时间: ${deviceStatus.lastUpdateTime}`;
+            }
+            
             setTimeout(() => queryDeviceStatus(), 2000);
             
             return true;
@@ -966,58 +957,44 @@
         }
       }
       
-      // 更新设备状态界面
-      function updateDeviceStatusUI() {
-        const doorToggleBtn = document.getElementById('door-toggle');
-        doorToggleBtn.textContent = deviceStatus.isLocked ? '已关门' : '已开门';
-        doorToggleBtn.classList.remove('door-open', 'door-closed');
-        doorToggleBtn.classList.add(deviceStatus.isLocked ? 'door-closed' : 'door-open');
-      }
-      
-      // 开关门柜功能
-      document.getElementById('door-toggle').addEventListener('click', async function() {
-        this.disabled = true;
-        await setDeviceLockStatus(!deviceStatus.isLocked);
+      document.getElementById('door-toggle').addEventListener('click', async () => {
+        const currentLockStatus = deviceVariables.lock || deviceStatus.isLocked;
+        const newLockStatus = !currentLockStatus;
+        await setDeviceLockStatus(newLockStatus);
       });
       
-      // 加载学生二维码
+      // 二维码加载
       function loadStudentQRCode() {
         const studentUsername = document.getElementById('student-username').value || '210797';
         document.getElementById('qrcode-image').src = 
           `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${studentUsername}`;
       }
 
-      // 插入归还超时记录
+      function loadTeacherQRCode() {
+        const teacherUsername = document.getElementById('teacher-username').value || '359921';
+        document.getElementById('teacher-qrcode-image').src = 
+          `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${teacherUsername}`;
+      }
+
+      // 异常记录处理
       function insertExceptionRecord() {
         const exceptionTableBody = document.getElementById('exception-table-body');
-        if (!exceptionTableBody) return;
+        if (!exceptionTableBody || deviceVariables.error_flag === 0) return;
         
-        // 检查error_flag是否为非0，只有不为0时才插入记录
-        if (deviceVariables.error_flag === 0) return;
-        
-        // 获取当前日期
         const dateStr = getCurrentDateString();
-        
-        // 确定柜子编号
         const cabinetNumber = deviceVariables.cabinet;
-        
-        // 确定器材类型
         const equipment = deviceVariables.ping_pong ? '乒乓球' : '跳绳';
-        
-        // 获取账号
         const account = deviceVariables.error_flag.toString();
         
-        // 根据账号随机生成姓名
         const names = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '郑十', '吴一', '陈二'];
         const name = getRandomName(account, names);
         
-        // 检查当天是否已存在该账号的记录
         const rows = exceptionTableBody.querySelectorAll('tr');
         let accountExists = false;
         
         rows.forEach(row => {
-          const accountCell = row.cells[0]; // 账号单元格
-          const dateCell = row.cells[2]; // 时期单元格
+          const accountCell = row.cells[0];
+          const dateCell = row.cells[2];
           
           if (accountCell && dateCell && 
               accountCell.textContent === account && 
@@ -1026,13 +1003,9 @@
           }
         });
         
-        // 如果当天已存在该账号的记录，则不添加
         if (accountExists) return;
         
-        // 创建新行
         const newRow = document.createElement('tr');
-        
-        // 设置行内容
         newRow.innerHTML = `
           <td>${account}</td>
           <td>${name}</td>
@@ -1042,46 +1015,52 @@
           <td class="status-cell" data-status="pending">未处理</td>
         `;
         
-        // 插入到表格顶部
         if (exceptionTableBody.firstChild) {
           exceptionTableBody.insertBefore(newRow, exceptionTableBody.firstChild);
         } else {
           exceptionTableBody.appendChild(newRow);
         }
         
-        // 确保当日之前的记录状态为"已处理"
         updatePastRecordsStatus();
       }
       
-      // 根据账号获取随机但固定的姓名
       function getRandomName(account, names) {
-        // 使用账号作为种子生成固定的随机索引
         const seed = parseInt(account.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0));
         const index = seed % names.length;
         return names[index];
       }
 
-      // 添加状态单元格的点击事件
-      function setupStatusCellClickEvents() {
-        const exceptionTableBody = document.getElementById('exception-table-body');
-        if (!exceptionTableBody) return;
-        
+      // 状态单元格点击事件
+      const exceptionTableBody = document.getElementById('exception-table-body');
+      if (exceptionTableBody) {
         exceptionTableBody.addEventListener('click', function(event) {
           const target = event.target;
           if (target.classList.contains('status-cell')) {
-            // 获取当前状态并切换
             const currentStatus = target.getAttribute('data-status');
             const newStatus = currentStatus === 'pending' ? 'done' : 'pending';
             
-            // 更新UI
             target.setAttribute('data-status', newStatus);
             target.textContent = newStatus === 'pending' ? '未处理' : '已处理';
           }
         });
       }
-      
-      // 添加状态单元格的点击事件
-      setupStatusCellClickEvents();
+
+      // 更新门锁状态显示
+      function updateLockDisplay(isLocked) {
+        const lockStatusElement = document.getElementById('lock-status');
+        if (lockStatusElement) {
+          lockStatusElement.textContent = `门状态: ${isLocked ? '已关门 (Lock = true)' : '已开门 (Lock = false)'}`;
+        }
+        
+        const doorToggleBtn = document.getElementById('door-toggle');
+        if (doorToggleBtn) {
+          doorToggleBtn.textContent = isLocked ? '已关门' : '已开门';
+          doorToggleBtn.classList.remove('door-open', 'door-closed');
+          doorToggleBtn.classList.add(isLocked ? 'door-closed' : 'door-open');
+        }
+        
+        deviceStatus.isLocked = isLocked;
+      }
     });
   </script>
 </body>
