@@ -511,9 +511,6 @@
           opacity: 0.7;
         }
       }
-      table, th, td {table-layout:fixed;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-      .status-cell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;padding:4px 8px;}
-      td:first-child,th:first-child{min-width:32px;width:32px;white-space:normal;overflow:visible;text-overflow:clip;}
     }
     
     /* 针对更小屏幕的手机 */
@@ -902,13 +899,32 @@
     .clear-history-btn:hover {
       background-color: #c82333;
     }
-
-    /* 添加新样式 */
-    @media screen and (max-width: 768px) {
-      .exception-select, #exception-select-all, #delete-exception-btn {display:none;}
-      .show-select .exception-select, .show-select #exception-select-all, .show-select #delete-exception-btn {display:inline-block;}
-      td:first-child,th:first-child {display:none;}
-      .show-select td:first-child,.show-select th:first-child {display:table-cell;min-width:32px;width:32px;}
+    
+    /* 默认隐藏选择相关元素 - 放在其他样式之前 */
+    .exception-select, #exception-select-all, #delete-exception-btn, 
+    #teacher-exception th:first-child, #teacher-exception td:first-child {
+      display: none !important;
+    }
+    
+    /* 选择模式时显示 */
+    .show-select .exception-select, 
+    .show-select #exception-select-all, 
+    .show-select #delete-exception-btn,
+    .show-select #teacher-exception th:first-child,
+    .show-select #teacher-exception td:first-child {
+      display: table-cell !important;
+    }
+    
+    .show-select #delete-exception-btn {
+      display: block !important;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      border-radius: 50px;
+      padding: 12px 24px;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      animation: fadeIn 0.3s ease;
     }
   </style>
 </head>
@@ -2408,6 +2424,33 @@
           font-size: 14px;
           color: var(--primary-color);
         }
+        
+        /* 默认隐藏选择相关元素 */
+        .exception-select, #exception-select-all, #delete-exception-btn, 
+        #teacher-exception th:first-child, #teacher-exception td:first-child {
+          display: none !important;
+        }
+        
+        /* 选择模式时显示 */
+        .show-select .exception-select, 
+        .show-select #exception-select-all, 
+        .show-select #delete-exception-btn,
+        .show-select #teacher-exception th:first-child,
+        .show-select #teacher-exception td:first-child {
+          display: table-cell !important;
+        }
+        
+        .show-select #delete-exception-btn {
+          display: block !important;
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 1000;
+          border-radius: 50px;
+          padding: 12px 24px;
+          box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+          animation: fadeIn 0.3s ease;
+        }
       `;
       document.head.appendChild(styleElement);
 
@@ -2537,36 +2580,59 @@
         }
       }
 
-      // 添加长按选择功能
+      // 统一PC和移动端的长按选择功能
       let longPressTimer;
+      let isSelectionMode = false;
       const exceptionTable = document.getElementById('teacher-exception');
+      
       if(exceptionTable) {
-        // 长按开始
-        exceptionTable.addEventListener('touchstart', function(e) {
-          if(e.target.closest('tr')) {
+        // 长按/鼠标长按开始
+        const startLongPress = function(e) {
+          if(e.target.closest('tr') && !e.target.closest('td:last-child')) {
             longPressTimer = setTimeout(() => {
+              isSelectionMode = true;
               document.querySelector('.container').classList.add('show-select');
-              e.target.closest('tr').querySelector('.exception-select').checked = true;
+              const checkbox = e.target.closest('tr').querySelector('.exception-select');
+              if(checkbox) checkbox.checked = true;
             }, 500);
+          }
+        };
+        
+        // 长按/鼠标长按结束
+        const endLongPress = function() {
+          clearTimeout(longPressTimer);
+        };
+        
+        // 移动端事件
+        exceptionTable.addEventListener('touchstart', startLongPress, {passive: true});
+        exceptionTable.addEventListener('touchend', endLongPress);
+        exceptionTable.addEventListener('touchmove', endLongPress);
+        
+        // PC端事件
+        exceptionTable.addEventListener('mousedown', startLongPress);
+        exceptionTable.addEventListener('mouseup', endLongPress);
+        exceptionTable.addEventListener('mouseleave', endLongPress);
+        
+        // 点击空白处退出选择模式
+        document.addEventListener('click', function(e) {
+          if(isSelectionMode && !e.target.closest('tr') && !e.target.closest('#delete-exception-btn')) {
+            isSelectionMode = false;
+            document.querySelector('.container').classList.remove('show-select');
+            document.querySelectorAll('.exception-select').forEach(c => c.checked = false);
+            if(document.getElementById('exception-select-all')) {
+              document.getElementById('exception-select-all').checked = false;
+            }
           }
         });
         
-        // 触摸移动时取消长按
-        exceptionTable.addEventListener('touchmove', function() {
-          clearTimeout(longPressTimer);
-        });
-        
-        // 触摸结束时取消长按计时
-        exceptionTable.addEventListener('touchend', function() {
-          clearTimeout(longPressTimer);
-        });
-        
-        // 点击空白处取消选择模式
-        document.addEventListener('click', function(e) {
-          if(!e.target.closest('tr') && !e.target.closest('#delete-exception-btn')) {
-            document.querySelector('.container').classList.remove('show-select');
-            document.querySelectorAll('.exception-select').forEach(c => c.checked = false);
-            document.getElementById('exception-select-all').checked = false;
+        // 选择模式下的点击处理
+        exceptionTable.addEventListener('click', function(e) {
+          if(isSelectionMode && e.target.closest('tr') && !e.target.closest('td:last-child')) {
+            e.preventDefault();
+            const checkbox = e.target.closest('tr').querySelector('.exception-select');
+            if(checkbox && e.target !== checkbox) {
+              checkbox.checked = !checkbox.checked;
+            }
           }
         });
       }
