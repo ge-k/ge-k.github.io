@@ -618,34 +618,40 @@
     
     /* 状态单元格样式 */
     .status-cell {
-      cursor: pointer;
-      font-weight: 600;
-      padding: 6px 10px;
+      padding: 6px 16px;  /* 增加左右内边距 */
       border-radius: 20px;
-      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
       display: inline-block;
-      text-align: center;
+      margin: 0 auto;     /* 水平居中 */
+      min-width: 70px;    /* 确保最小宽度 */
+      text-align: center; /* 文字居中 */
     }
     
     .status-cell[data-status="pending"] {
-      color: var(--danger-color);
-      background-color: var(--danger-light);
-      box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+      background-color: #fef1f1;
+      color: #dc3545;
     }
     
     .status-cell[data-status="done"] {
-      color: var(--success-color);
-      background-color: var(--success-light);
-      box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+      background-color: #e5f9ee;
+      color: #28a745;
     }
     
-    .status-cell:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .status-cell:active {
-      transform: translateY(1px);
+    @media screen and (max-width: 768px) {
+      /* 调整状态列宽度和对齐方式 */
+      td:last-child {
+        padding-right: 20px;  /* 增加右侧空间 */
+        text-align: center;   /* 确保居中 */
+        min-width: 90px;      /* 增加最小宽度 */
+      }
+      
+      .status-cell {
+        padding: 6px 16px;    /* 保持一致的内边距 */
+        margin: 0 auto;       /* 水平居中 */
+        transform: translateX(-5px); /* 稍微向左偏移以确保圆弧完整显示 */
+      }
     }
     
     /* 搜索框样式 */
