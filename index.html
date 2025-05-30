@@ -902,6 +902,14 @@
     .clear-history-btn:hover {
       background-color: #c82333;
     }
+
+    /* 添加新样式 */
+    @media screen and (max-width: 768px) {
+      .exception-select, #exception-select-all, #delete-exception-btn {display:none;}
+      .show-select .exception-select, .show-select #exception-select-all, .show-select #delete-exception-btn {display:inline-block;}
+      td:first-child,th:first-child {display:none;}
+      .show-select td:first-child,.show-select th:first-child {display:table-cell;min-width:32px;width:32px;}
+    }
   </style>
 </head>
 <body>
@@ -2527,6 +2535,40 @@
           console.log(`刷新显示 - 当前登录账号: ${account}`);
           generateInitialHistoryRecords();
         }
+      }
+
+      // 添加长按选择功能
+      let longPressTimer;
+      const exceptionTable = document.getElementById('teacher-exception');
+      if(exceptionTable) {
+        // 长按开始
+        exceptionTable.addEventListener('touchstart', function(e) {
+          if(e.target.closest('tr')) {
+            longPressTimer = setTimeout(() => {
+              document.querySelector('.container').classList.add('show-select');
+              e.target.closest('tr').querySelector('.exception-select').checked = true;
+            }, 500);
+          }
+        });
+        
+        // 触摸移动时取消长按
+        exceptionTable.addEventListener('touchmove', function() {
+          clearTimeout(longPressTimer);
+        });
+        
+        // 触摸结束时取消长按计时
+        exceptionTable.addEventListener('touchend', function() {
+          clearTimeout(longPressTimer);
+        });
+        
+        // 点击空白处取消选择模式
+        document.addEventListener('click', function(e) {
+          if(!e.target.closest('tr') && !e.target.closest('#delete-exception-btn')) {
+            document.querySelector('.container').classList.remove('show-select');
+            document.querySelectorAll('.exception-select').forEach(c => c.checked = false);
+            document.getElementById('exception-select-all').checked = false;
+          }
+        });
       }
     });
 
