@@ -271,7 +271,9 @@
     }
     
     table, th, td {
-      border: none;
+      padding: 12px 8px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
     }
     
     th, td {
@@ -468,10 +470,24 @@
       }
       
       table, th, td {
-        padding: 8px;
-        font-size: 14px;
-        white-space: normal; /* 允许换行 */
-        word-break: break-word; /* 允许在任意字符间换行 */
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        text-align: center;
+        padding: 10px 6px;
+      }
+      
+      td:nth-child(1) { min-width: 70px; } /* 账号 */
+      td:nth-child(2) { min-width: 60px; } /* 姓名 */
+      td:nth-child(3) { min-width: 90px; } /* 时期 */
+      td:nth-child(4) { min-width: 40px; } /* 柜子 */
+      td:nth-child(5) { min-width: 50px; } /* 器材 */
+      
+      .status-cell {
+        white-space: nowrap !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        display: inline-block;
       }
       
       /* 状态列保持一行 */
