@@ -477,17 +477,20 @@
         padding: 10px 6px;
       }
       
-      td:nth-child(1) { min-width: 70px; } /* 账号 */
-      td:nth-child(2) { min-width: 60px; } /* 姓名 */
-      td:nth-child(3) { min-width: 90px; } /* 时期 */
-      td:nth-child(4) { min-width: 40px; } /* 柜子 */
-      td:nth-child(5) { min-width: 50px; } /* 器材 */
+      td:nth-child(1) { min-width: 80px; } /* 账号 */
+      td:nth-child(3) { min-width: 100px; } /* 时期 */
+      td:nth-child(4) { min-width: 50px; } /* 柜子 */
+      td:nth-child(5) { min-width: 60px; } /* 器材 */
+      td:last-child { 
+        min-width: 90px;
+        padding-right: 20px;
+      } /* 状态 */
       
+      /* 状态单元格样式保持不变 */
       .status-cell {
-        white-space: nowrap !important;
-        padding: 6px 12px;
-        border-radius: 20px;
-        display: inline-block;
+        padding: 6px 16px;
+        margin: 0 auto;
+        transform: translateX(-5px);
       }
       
       /* 状态列保持一行 */
@@ -981,6 +984,30 @@
       padding: 12px 24px;
       box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
       animation: fadeIn 0.3s ease;
+    }
+
+    /* 隐藏姓名列 */
+    #teacher-exception td:nth-child(3),
+    #teacher-exception th:nth-child(3) {
+      display: none !important;
+    }
+
+    /* 确保其他列显示 */
+    #teacher-exception td,
+    #teacher-exception th {
+      display: table-cell;
+    }
+
+    /* 选择模式下的第一列（复选框列）保持隐藏逻辑 */
+    #teacher-exception td:first-child,
+    #teacher-exception th:first-child {
+      display: none;
+    }
+
+    .show-select #teacher-exception td:first-child,
+    .show-select #teacher-exception th:first-child {
+      display: table-cell;
+      width: 40px;
     }
   </style>
 </head>
