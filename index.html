@@ -883,6 +883,22 @@
     body.dark-mode .theme-toggle svg {
       color: var(--dark-text-main);
     }
+
+    /* 清除历史记录按钮样式 */
+    .clear-history-container {
+      text-align: right;
+      margin: 15px 0;
+    }
+    
+    .clear-history-btn {
+      background-color: var(--danger-color);
+      max-width: 150px;
+      padding: 10px 20px;
+    }
+    
+    .clear-history-btn:hover {
+      background-color: #c82333;
+    }
   </style>
 </head>
 <body>
@@ -946,7 +962,11 @@
       <!-- 历史记录界面 -->
       <div id="student-history" class="tab-panel">
         <h2>历史使用记录</h2>
-        <div class="total-hours">历史使用总时长: <span id="total-year-hours">21</span> 小时</div>
+        
+        <!-- 添加清除按钮 -->
+        <div class="clear-history-container">
+          <button id="clear-history-btn" class="clear-history-btn">清除历史记录</button>
+        </div>
         
         <!-- 添加实时状态显示区域 -->
         <div class="status-display">
@@ -962,7 +982,7 @@
             </div>
             <div class="status-item">
               <span class="status-label">使用时长(use_time):</span>
-              <span id="current-use-time" class="status-value" style="color: var(--danger-color); background: var(--danger-light);">0</span>
+              <span id="current-use-time" class="status-value" style="color: var(--danger-color); background: var(--danger-light);">0</span> 秒
             </div>
           </div>
         </div>
@@ -972,7 +992,7 @@
             <tr>
               <th>日期</th>
               <th>器材</th>
-              <th>使用时长 (小时)</th>
+              <th>使用时长</th>
             </tr>
           </thead>
           <tbody id="history-table-body">
@@ -1014,7 +1034,6 @@
         <div class="door-control">
           <button id="door1-toggle" class="door-btn">加载中...</button>
           <button id="door2-toggle" class="door-btn">加载中...</button>
-          <button id="door3-toggle" class="door-btn">加载中...</button>
         </div>
         
         <div class="device-info">
@@ -1023,8 +1042,6 @@
           <p class="result" id="lock1-update-time">最后更新时间: 查询中...</p>
           <p class="result" id="lock2-status">门2状态: 查询中...</p>
           <p class="result" id="lock2-update-time">最后更新时间: 查询中...</p>
-          <p class="result" id="lock3-status">门3状态: 查询中...</p>
-          <p class="result" id="lock3-update-time">最后更新时间: 查询中...</p>
         </div>
       </div>
 
@@ -1034,6 +1051,7 @@
         <div class="search-container">
           <input type="text" id="exception-search" placeholder="搜索..." class="search-input">
         </div>
+        <div style="margin-bottom:10px;display:flex;justify-content:flex-end"><button id="delete-exception-btn" style="background:#dc3545;color:#fff;border:none;border-radius:18px;padding:4px 14px;font-size:13px;box-shadow:0 2px 8px #dc354533;cursor:pointer;transition:all .2s;display:inline-block;min-width:auto;width:auto;">删除选中记录</button></div>
         <!-- 添加错误标志显示区域 -->
         <div class="status-display">
           <div class="status-title">
@@ -1060,6 +1078,7 @@
         <table>
           <thead>
             <tr>
+              <th><input type="checkbox" id="exception-select-all"></th>
               <th>账号</th>
               <th>姓名</th>
               <th>时期</th>
@@ -1069,30 +1088,7 @@
             </tr>
           </thead>
           <tbody id="exception-table-body">
-            <tr>
-              <td>201801</td><td>张明</td><td></td><td>2</td><td>乒乓球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201802</td><td>李华</td><td></td><td>1</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201803</td><td>王芳</td><td></td><td>3</td><td>篮球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201804</td><td>赵强</td><td></td><td>2</td><td>乒乓球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201805</td><td>陈静</td><td></td><td>1</td><td>篮球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201806</td><td>杨光</td><td></td><td>3</td><td>跳绳</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201807</td><td>周敏</td><td></td><td>2</td><td>篮球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
-            <tr>
-              <td>201808</td><td>吴强</td><td></td><td>1</td><td>乒乓球</td><td class="status-cell" data-status="done">已处理</td>
-            </tr>
+            <!-- 异常记录将动态生成 -->
           </tbody>
         </table>
       </div>
@@ -1124,21 +1120,80 @@
       
       // 设备状态变量
       let deviceVariables = {
-        use_flag: false,
+        use_flag: 0,  // 改为int32类型
         equipment_type: 0,
         use_time: 0,
         错误标志: 0,
         cabinet: 0,
         Lock1: false,
-        Lock2: false,
-        Lock3: false
+        Lock2: false
       };
       
       // 保存上一个状态的use_flag，用于检测变化
-      let previousUseFlag = false;
+      let previousUseFlag = 0;  // 改为int32类型
+      
+      // 添加计时器相关变量
+      // 计时器全局唯一挂载
+      if(!window.timerStartTime)window.timerStartTime={'210797':0,'175905':0,'175908':0};
+      if(!window.timerInterval)window.timerInterval={'210797':null,'175905':null,'175908':null};
+      if(!window.timerCurrent)window.timerCurrent={'210797':0,'175905':0,'175908':0};
+      
+      // 开始计时函数
+      function startTimer(account) {
+        console.log(`开始计时 - 账号: ${account}`); // 添加调试日志
+        if (window.timerInterval[account]) {
+          console.log(`账号 ${account} 已有计时器在运行，先清除`);
+          clearInterval(window.timerInterval[account]);
+        }
+        
+        window.timerStartTime[account] = Date.now();
+        window.timerCurrent[account] = 0;
+        window.timerInterval[account] = setInterval(() => {
+          window.timerCurrent[account] = Math.floor((Date.now() - window.timerStartTime[account]) / 1000);
+          
+          // 如果当前登录的是这个账号，则更新显示
+          const currentUser = document.getElementById('student-username').value;
+          if (currentUser === account) {
+            const useTimeDisplay = document.getElementById('current-use-time');
+            if (useTimeDisplay) {
+              useTimeDisplay.textContent = window.timerCurrent[account];
+            }
+          }
+        }, 1000);
+      }
+      
+      // 停止计时函数
+      function stopTimer(account) {
+        console.log(`停止计时 - 账号: ${account}`); // 添加调试日志
+        if (window.timerInterval[account]) {
+          clearInterval(window.timerInterval[account]);
+          window.timerInterval[account] = null;
+          
+          // 计算最终使用时长（秒）
+          const finalTime = Math.floor((Date.now() - window.timerStartTime[account]) / 1000);
+          window.timerStartTime[account] = 0;
+          
+          window.timerCurrent[account] = finalTime;
+          console.log(`计时结束 - 账号: ${account}, 最终时长: ${finalTime}秒`);
+          
+          // 更新显示
+          if (document.getElementById('student-username').value === account) {
+            const useTimeDisplay = document.getElementById('current-use-time');
+            if (useTimeDisplay) {
+              useTimeDisplay.textContent = finalTime;
+            }
+          }
+          
+          return finalTime;
+        }
+        return 0;
+      }
       
       // 初始化历史记录
       generateInitialHistoryRecords();
+      
+      // 初始化异常记录存储
+      initExceptionStorage();
       
       // 按钮点击波纹效果
       addRippleEffect();
@@ -1187,40 +1242,119 @@
         // 清空现有记录
         historyTableBody.innerHTML = '';
         
-        // 获取当前日期
-        const today = new Date();
+        // 获取当前登录的用户账号
+        const currentUser = document.getElementById('student-username').value;
+        console.log('当前登录账号:', currentUser); // 调试日志
         
-        // 器材类型选项
-        const equipmentTypes = ['乒乓球', '跳绳', '篮球'];
+        // 从本地存储加载当前用户的历史记录
+        const storageKey = `history_${currentUser}`; // 使用独立的存储键
+        const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        console.log(`加载${currentUser}的历史记录:`, userRecords); // 调试日志
         
-        // 生成20条历史记录，均匀分布在过去两个月内
-        for (let i = 0; i < 20; i++) {
-          // 计算日期，均匀分布在过去两个月内
-          const daysAgo = Math.floor((60 / 20) * (i + 1));
-          const recordDate = new Date(today);
-          recordDate.setDate(today.getDate() - daysAgo);
-          
-          // 格式化日期
-          const dateStr = recordDate.getFullYear() + '-' + 
-                         String(recordDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                         String(recordDate.getDate()).padStart(2, '0');
-          
-          // 随机选择器材
-          const equipment = equipmentTypes[Math.floor(Math.random() * equipmentTypes.length)];
-          
-          // 随机生成0.5到3小时的使用时长
-          const usageTime = (Math.random() * 2.5 + 0.5).toFixed(1);
-          
-          // 创建表格行
+        // 显示当前用户的记录
+        userRecords.forEach(record => {
           const row = document.createElement('tr');
-          row.innerHTML = `<td>${dateStr}</td><td>${equipment}</td><td>${usageTime}</td>`;
-          
-          // 添加到表格
+          row.innerHTML = `<td>${record.date}</td><td>${record.equipment}</td><td>${isNaN(record.duration)?record.duration:formatDuration(record.duration)}</td>`;
+          historyTableBody.appendChild(row);
+        });
+        
+        // 更新总时长统计
+        updateTotalHours(currentUser);
+      }
+      
+      // 更新总时长统计
+      function updateTotalHours(userId) {
+        const totalHoursElement = document.getElementById('total-year-hours');
+        if (!totalHoursElement) return;
+        
+        // 获取当前用户的历史记录
+        const userRecords = JSON.parse(localStorage.getItem(`history_${userId}`) || '[]');
+        
+        // 计算总时长（分钟）
+        const totalMinutes = userRecords.reduce((total, record) => {
+          return total + parseInt(record.duration || 0);
+        }, 0);
+        
+        // 转换为小时并显示（保留一位小数）
+        const totalHours = (totalMinutes / 60).toFixed(1);
+        totalHoursElement.textContent = totalHours;
+      }
+      
+      // 插入新的历史记录
+      function insertNewHistoryRecord(date, isOngoing) {
+        const historyTableBody = document.getElementById('history-table-body');
+        if (!historyTableBody) return;
+        
+        // 获取当前用户
+        const currentUser = document.getElementById('student-username').value;
+        const storageKey = `history_${currentUser}`; // 使用独立的存储键
+        
+        // 获取器材类型
+        const equipmentType = getUserEquipmentType(deviceVariables.equipment_type, currentUser);
+        
+        // 创建新记录
+        const newRecord = {
+          date: date,
+          equipment: equipmentType,
+          duration: isOngoing ? '进行中' : '0'
+        };
+        
+        // 获取当前用户的现有记录
+        const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        
+        // 添加新记录到数组开头
+        userRecords.unshift(newRecord);
+        
+        // 保存回本地存储
+        localStorage.setItem(storageKey, JSON.stringify(userRecords));
+        
+        // 更新显示
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${newRecord.date}</td>
+          <td>${newRecord.equipment}</td>
+          <td>${newRecord.duration}</td>
+        `;
+        
+        if (historyTableBody.firstChild) {
+          historyTableBody.insertBefore(row, historyTableBody.firstChild);
+        } else {
           historyTableBody.appendChild(row);
         }
+      }
+      
+      // 更新历史记录行
+      function updateHistoryRow(row, isOngoing, useTimeSec) {
+        const currentUser = document.getElementById('student-username').value;
+        const storageKey = `history_${currentUser}`; // 使用独立的存储键
+        const date = row.cells[0].textContent;
+        const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const recordIndex = userRecords.findIndex(r => r.date === date);
         
-        // 更新总使用时长
-        updateTotalHours();
+        if (recordIndex !== -1) {
+          if (isOngoing) {
+            userRecords[recordIndex].duration = '进行中';
+            row.cells[2].textContent = '进行中';
+          } else {
+            let prev = parseInt(userRecords[recordIndex].rawSeconds || 0);
+            let now = parseInt(useTimeSec || 0);
+            if (userRecords[recordIndex].duration !== '进行中') now += prev;
+            userRecords[recordIndex].rawSeconds = now;
+            userRecords[recordIndex].duration = formatDuration(now);
+            row.cells[2].textContent = userRecords[recordIndex].duration;
+            
+            // 器材类型追加逻辑
+            let eq = getUserEquipmentType(deviceVariables.equipment_type, currentUser);
+            let eqs = userRecords[recordIndex].equipment.split(',');
+            if(!eqs.includes(eq)) {
+              userRecords[recordIndex].equipment += ',' + eq;
+              row.cells[1].textContent = userRecords[recordIndex].equipment;
+            }
+          }
+          
+          // 保存回本地存储
+          localStorage.setItem(storageKey, JSON.stringify(userRecords));
+        }
       }
       
       // 添加按钮点击波纹效果
@@ -1250,7 +1384,7 @@
         const doorButtons = document.querySelectorAll('.door-btn');
         doorButtons.forEach(btn => {
           btn.style.width = '120px';
-          if (btn.id !== 'door3-toggle') {
+          if (btn.id !== 'door2-toggle') {
             btn.style.marginRight = '10px';
           }
         });
@@ -1258,9 +1392,9 @@
       
       // 存储用户名和姓名的映射
       const userNameMap = {
-        '175905': '李明',
-        '210797': '张华',
-        '175908': '王芳'
+        '175905': '徐如玉',
+        '210797': '葛科元',
+        '175908': '张博祯'
       };
       
       // OneNet物联网平台API配置
@@ -1391,6 +1525,74 @@
       const deviceStatusInterval = setInterval(fetchDeviceVariables, 1000);
       fetchDeviceVariables();
       
+      // 根据账号和use_flag获取对应的使用状态
+      function getUserUseFlag(use_flag, account) {
+        console.log('当前use_flag值:', use_flag); // 添加调试日志
+        console.log('当前账号:', account); // 添加调试日志
+        
+        let digit = 0;
+        // 确保use_flag是数字类型
+        use_flag = parseInt(use_flag);
+        
+        switch(account) {
+          case '210797':
+            digit = Math.floor(use_flag / 100) % 10; // 获取百位
+            console.log('210797账号百位值:', digit); // 添加调试日志
+            break;
+          case '175905':
+            digit = Math.floor((use_flag % 100) / 10); // 获取十位
+            console.log('175905账号十位值:', digit); // 添加调试日志
+            break;
+          case '175908':
+            digit = use_flag % 10; // 获取个位
+            console.log('175908账号个位值:', digit); // 添加调试日志
+            break;
+        }
+        const result = digit === 1;
+        console.log(`账号 ${account} 的状态计算结果:`, result);
+        return result;
+      }
+
+      // 根据账号和equipment_type获取对应的器材类型
+      function getUserEquipmentType(equipment_type, error_flag) {
+        console.log('当前equipment_type值:', equipment_type); 
+        console.log('当前错误标志:', error_flag); 
+        
+        let digit = 0;
+        // 确保equipment_type是数字类型
+        equipment_type = parseInt(equipment_type);
+        
+        // 根据错误标志选择不同的位数
+        switch(error_flag) {
+          case '210797':
+            digit = Math.floor(equipment_type / 100) % 10; // 获取百位
+            console.log('210797账号百位值:', digit);
+            break;
+          case '175905':
+            digit = Math.floor((equipment_type % 100) / 10); // 获取十位
+            console.log('175905账号十位值:', digit);
+            break;
+          case '175908':
+            digit = equipment_type % 10; // 获取个位
+            console.log('175908账号个位值:', digit);
+            break;
+          default:
+            return '未选择';
+        }
+        
+        // 根据数字返回对应的器材类型
+        switch(digit) {
+          case 0:
+            return '篮球';
+          case 1:
+            return '跳绳';
+          case 2:
+            return '乒乓球';
+          default:
+            return '未选择';
+        }
+      }
+
       // 从OneNet API获取设备变量
       async function fetchDeviceVariables() {
         try {
@@ -1407,12 +1609,6 @@
           if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
           
           const data = await response.json();
-          
-          // 更新调试信息区域
-          const debugInfo = document.getElementById('debug-info');
-          if (debugInfo) {
-            debugInfo.textContent = JSON.stringify(data, null, 2);
-          }
           
           if (data.code === 0 && data.data) {
             let properties = [];
@@ -1435,36 +1631,42 @@
             
             const useFlagProperty = properties.find(prop => prop.identifier === 'use_flag');
             const equipmentTypeProperty = properties.find(prop => prop.identifier === 'equipment_type');
-            const useTimeProperty = properties.find(prop => prop.identifier === 'use_time');
             const errorFlagProperty = properties.find(prop => prop.identifier === '错误标志');
             const cabinetProperty = properties.find(prop => prop.identifier === 'cabinet');
             const lock1Property = properties.find(prop => prop.identifier === 'Lock1');
             const lock2Property = properties.find(prop => prop.identifier === 'Lock2');
-            const lock3Property = properties.find(prop => prop.identifier === 'Lock3');
             
-            // 检查错误标志属性是否存在
-            if (!errorFlagProperty) {
-              console.warn('警告: 未找到标识符为"错误标志"的属性，正在尝试查找替代属性...');
-              
-              // 在调试信息中添加属性标识符列表
-              if (debugInfo) {
-                debugInfo.textContent = 
-                  '所有属性标识符: ' + 
-                  properties.map(p => p.identifier).join(', ') + 
-                  '\n\n原始数据:\n' + rawPropertiesData;
-              }
-            }
-            
-            // 更新设备变量状态
             if (useFlagProperty) {
-              deviceVariables.use_flag = convertToBoolean(useFlagProperty.value);
+              // 确保use_flag是整数
+              deviceVariables.use_flag = parseInt(useFlagProperty.value) || 0;
+              console.log('解析到的use_flag值:', deviceVariables.use_flag);
+              
+              // 处理所有账号的状态变化
+              const accounts = ['210797', '175905', '175908'];
+              accounts.forEach(account => {
+                const oldStatus = getUserUseFlag(oldUseFlag, account);
+                const newStatus = getUserUseFlag(deviceVariables.use_flag, account);
+                console.log(`账号 ${account} 状态变化:`, oldStatus, '->', newStatus);
+                
+                if (oldStatus === false && newStatus === true) {
+                  console.log(`开始计时 - 账号: ${account}`);
+                  startTimer(account);
+                } else if (oldStatus === true && newStatus === false) {
+                  console.log(`停止计时 - 账号: ${account}`);
+                  const useTime = stopTimer(account);
+                  console.log(`使用时长 - 账号: ${account}, 时长: ${useTime}秒`);
+                  updateHistoryWithTime(account, useTime);
+                }
+              });
               
               // 更新使用状态显示
               const useFlagDisplay = document.getElementById('current-use-flag');
               if (useFlagDisplay) {
-                useFlagDisplay.textContent = deviceVariables.use_flag.toString();
-                // 改变颜色来突显状态
-                if (deviceVariables.use_flag) {
+                const currentUser = document.getElementById('student-username').value;
+                const isUsing = getUserUseFlag(deviceVariables.use_flag, currentUser);
+                useFlagDisplay.textContent = isUsing.toString();
+                
+                if (isUsing) {
                   useFlagDisplay.style.color = '#28a745';
                   useFlagDisplay.style.backgroundColor = '#e5f9ee';
                 } else {
@@ -1476,42 +1678,29 @@
             
             if (equipmentTypeProperty) {
               deviceVariables.equipment_type = parseInt(equipmentTypeProperty.value) || 0;
+              console.log('解析到的equipment_type值:', deviceVariables.equipment_type);
               
               // 更新器材类型显示
               const equipmentTypeDisplay = document.getElementById('current-student-equipment-type');
               if (equipmentTypeDisplay) {
-                let equipmentName = '乒乓球';
-                if (deviceVariables.equipment_type === 1) {
-                  equipmentName = '跳绳';
-                } else if (deviceVariables.equipment_type === 2) {
-                  equipmentName = '篮球';
-                } else if (deviceVariables.equipment_type !== 0) {
-                  equipmentName = '未选择';
-                }
+                // 获取当前错误标志
+                const currentErrorFlag = deviceVariables.错误标志.toString();
+                
+                // 根据当前错误标志获取对应的器材类型
+                const equipmentName = getUserEquipmentType(deviceVariables.equipment_type, currentErrorFlag);
+                console.log('计算得到的器材类型:', equipmentName);
+                
                 equipmentTypeDisplay.textContent = equipmentName;
               }
               
               const equipmentTypeDisplay2 = document.getElementById('current-equipment-type');
               if (equipmentTypeDisplay2) {
-                let equipmentName = '乒乓球';
-                if (deviceVariables.equipment_type === 1) {
-                  equipmentName = '跳绳';
-                } else if (deviceVariables.equipment_type === 2) {
-                  equipmentName = '篮球';
-                } else if (deviceVariables.equipment_type !== 0) {
-                  equipmentName = '未选择';
-                }
+                // 获取当前错误标志
+                const currentErrorFlag = deviceVariables.错误标志.toString();
+                
+                // 根据当前错误标志获取对应的器材类型
+                const equipmentName = getUserEquipmentType(deviceVariables.equipment_type, currentErrorFlag);
                 equipmentTypeDisplay2.textContent = equipmentName;
-              }
-            }
-            
-            if (useTimeProperty) {
-              deviceVariables.use_time = parseFloat(useTimeProperty.value) || 0;
-              
-              // 更新使用时长显示
-              const useTimeDisplay = document.getElementById('current-use-time');
-              if (useTimeDisplay) {
-                useTimeDisplay.textContent = deviceVariables.use_time.toString();
               }
             }
             
@@ -1627,11 +1816,6 @@
               updateLockDisplay(2, deviceVariables.Lock2);
             }
             
-            if (lock3Property) {
-              deviceVariables.Lock3 = convertToBoolean(lock3Property.value);
-              updateLockDisplay(3, deviceVariables.Lock3);
-            }
-            
             // 检查错误标志变化并添加记录
             if (oldErrorFlag !== deviceVariables.错误标志 && deviceVariables.错误标志 !== 0) {
               const errorId = deviceVariables.错误标志.toString();
@@ -1646,27 +1830,31 @@
             const historyTableBody = document.getElementById('history-table-body');
             
             if (historyTableBody) {
+              const currentUser = document.getElementById('student-username').value;
+              const oldIsUsing = getUserUseFlag(oldUseFlag, currentUser);
+              const newIsUsing = getUserUseFlag(deviceVariables.use_flag, currentUser);
+              
               // 当use_flag从false变为true时添加或更新记录
-              if (oldUseFlag === false && deviceVariables.use_flag === true) {
+              if (oldIsUsing === false && newIsUsing === true) {
                 console.log('检测到使用状态变化: false -> true，更新历史记录');
                 const existingTodayRow = findTodayRow(historyTableBody, currentDateStr);
                 
                 if (existingTodayRow) {
                   // 如果今天已有记录，则更新该记录
-                  updateHistoryRow(existingTodayRow, true);
+                  updateHistoryRow(existingTodayRow, true, window.timerCurrent['210797']);
                 } else {
                   // 否则创建新记录
                   insertNewHistoryRecord(currentDateStr, true);
                 }
               }
               // 当use_flag从true变为false时替换"进行中"为实际使用时长
-              else if (oldUseFlag === true && deviceVariables.use_flag === false) {
+              else if (oldIsUsing === true && newIsUsing === false) {
                 console.log('检测到使用状态变化: true -> false，更新使用时长');
                 const existingTodayRow = findTodayRow(historyTableBody, currentDateStr);
                 
                 if (existingTodayRow) {
                   // 更新使用时长
-                  updateHistoryRow(existingTodayRow, false);
+                  updateHistoryRow(existingTodayRow, false, window.timerCurrent['210797']);
                 }
               }
             }
@@ -1683,7 +1871,6 @@
           console.error('获取设备状态失败:', error);
           document.getElementById('lock1-status').textContent = '门1状态: 查询出错';
           document.getElementById('lock2-status').textContent = '门2状态: 查询出错';
-          document.getElementById('lock3-status').textContent = '门3状态: 查询出错';
           return false;
         }
       }
@@ -1699,56 +1886,135 @@
         // 获取当前日期
         const today = getCurrentDateString();
         
+        // 检查是否已存在相同学生的当天记录
+        const existingRecords = getExceptionRecords();
+        const hasDuplicateRecord = existingRecords.some(record => 
+          record.accountId === errorId && record.date === today
+        );
+        
+        if (hasDuplicateRecord) {
+          console.log('今天已存在该学生的异常记录，跳过添加');
+          return;
+        }
+        
         // 获取柜子编号
         const cabinetNumber = deviceVariables.cabinet || 1;
         
         // 获取器材类型
-        let equipmentName = '乒乓球';
-        if (deviceVariables.equipment_type === 1) {
-          equipmentName = '跳绳';
-        } else if (deviceVariables.equipment_type === 2) {
-          equipmentName = '篮球';
+        const equipmentName = getUserEquipmentType(deviceVariables.equipment_type, errorId);
+        
+        // 创建新记录对象
+        const newRecord = {
+          accountId: errorId,
+          userName: userName,
+          date: today,
+          cabinet: cabinetNumber,
+          equipment: equipmentName,
+          status: '未处理',
+          timestamp: Date.now() // 添加时间戳用于排序
+        };
+        
+        // 保存到本地存储
+        saveExceptionRecord(newRecord);
+        
+        // 更新显示
+        updateExceptionTableDisplay();
+      }
+      
+      // 初始化异常记录存储
+      function initExceptionStorage() {
+        if (!localStorage.getItem('exceptionRecords')) {
+          localStorage.setItem('exceptionRecords', JSON.stringify([]));
         }
-        
-        // 创建新的表格行
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-          <td>${errorId}</td>
-          <td>${userName}</td>
-          <td>${today}</td>
-          <td>${cabinetNumber}</td>
-          <td>${equipmentName}</td>
-          <td class="status-cell" data-status="pending">未处理</td>
-        `;
-        
-        // 添加到表格顶部
-        if (exceptionTableBody.firstChild) {
-          exceptionTableBody.insertBefore(newRow, exceptionTableBody.firstChild);
-        } else {
-          exceptionTableBody.appendChild(newRow);
+        // 教师登录成功时加载异常记录
+        if (document.getElementById('teacher-exception')) {
+          updateExceptionTableDisplay();
         }
+      }
+      
+      // 获取所有异常记录
+      function getExceptionRecords() {
+        const records = localStorage.getItem('exceptionRecords');
+        return records ? JSON.parse(records) : [];
+      }
+      
+      // 保存异常记录
+      function saveExceptionRecord(record) {
+        const records = getExceptionRecords();
+        records.push(record);
+        localStorage.setItem('exceptionRecords', JSON.stringify(records));
+      }
+      
+      // 更新异常记录状态
+      function updateExceptionStatus(accountId, date, newStatus) {
+        const records = getExceptionRecords();
+        const recordIndex = records.findIndex(r => r.accountId === accountId && r.date === date);
         
-        // 绑定状态单元格点击事件
-        const statusCell = newRow.querySelector('.status-cell');
-        if (statusCell) {
-          statusCell.addEventListener('click', function() {
-            const currentStatus = this.getAttribute('data-status');
-            const newStatus = currentStatus === 'done' ? 'pending' : 'done';
-            
-            // 更新状态文本和属性
-            this.setAttribute('data-status', newStatus);
-            this.textContent = newStatus === 'done' ? '已处理' : '未处理';
-            
-            // 确保颜色样式正确应用
-            if (newStatus === 'pending') {
-              this.style.color = '#dc3545';
-              this.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
-            } else {
-              this.style.color = '#28a745';
-              this.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
-            }
+        if (recordIndex !== -1) {
+          records[recordIndex].status = newStatus;
+          localStorage.setItem('exceptionRecords', JSON.stringify(records));
+          updateExceptionTableDisplay();
+        }
+      }
+      
+      // 更新异常记录表格显示
+      function updateExceptionTableDisplay() {
+        const exceptionTableBody = document.getElementById('exception-table-body');
+        if (!exceptionTableBody) return;
+        
+        // 获取并按时间戳倒序排序记录
+        let records = getExceptionRecords().filter(r=>r.accountId&&r.accountId!=='undefined');
+        // 自动清理脏数据
+        if(records.length!==getExceptionRecords().length)
+          localStorage.setItem('exceptionRecords',JSON.stringify(records));
+        records = records.sort((a, b) => b.timestamp - a.timestamp);
+        
+        // 清空现有表格内容
+        exceptionTableBody.innerHTML = '';
+        
+        // 添加所有记录
+        records.forEach(record => {
+          const row = document.createElement('tr');
+          let statusColor = record.status === '未处理' ? 'color:#dc3545;background:#fae8ea;' : 'color:#28a745;background:#e5f9ee;';
+          row.innerHTML = `
+            <td><input type='checkbox' class='exception-select' data-id='${record.accountId}' data-date='${record.date}'></td>
+            <td>${record.accountId}</td>
+            <td>${record.userName}</td>
+            <td>${record.date}</td>
+            <td>${record.cabinet}</td>
+            <td>${record.equipment}</td>
+            <td class="status-cell" data-status="${record.status === '未处理' ? 'pending' : 'processed'}" style="${statusColor}font-weight:600;border-radius:18px;padding:4px 16px;box-shadow:0 2px 8px #28a74522;">${record.status}</td>
+          `;
+          // 为状态单元格添加点击事件
+          const statusCell = row.querySelector('.status-cell');
+          statusCell.addEventListener('click', () => {
+            const newStatus = record.status === '未处理' ? '已处理' : '未处理';
+            updateExceptionStatus(record.accountId, record.date, newStatus);
           });
+          exceptionTableBody.appendChild(row);
+        });
+        // 全选功能
+        const allBox=document.getElementById('exception-select-all');
+        if(allBox){
+          allBox.onclick=()=>{
+            document.querySelectorAll('.exception-select').forEach(c=>c.checked=allBox.checked);
+          };
         }
+        // 删除按钮事件绑定
+        const delBtn=document.getElementById('delete-exception-btn');
+        if(delBtn)delBtn.onclick=function(){
+          let sel=document.querySelectorAll('.exception-select:checked');
+          if(!sel.length)return alert('请先选择要删除的记录');
+          if(!confirm('确定要删除选中记录吗？'))return;
+          let records=getExceptionRecords();
+          sel.forEach(box=>{
+            let id=box.getAttribute('data-id'),date=box.getAttribute('data-date');
+            let idx=records.findIndex(r=>r.accountId==id&&r.date==date);
+            if(idx>-1)records.splice(idx,1);
+          });
+          localStorage.setItem('exceptionRecords',JSON.stringify(records));
+          updateExceptionTableDisplay();
+        };
       }
       
       // 历史记录相关函数
@@ -1761,101 +2027,6 @@
           }
         }
         return null;
-      }
-      
-      function updateHistoryRow(row, inProgress) {
-        if (!row) return;
-        
-        const equipmentCell = row.cells[1];
-        const durationCell = row.cells[2];
-        
-        // 获取当前设备使用的器材名称
-        let currentEquipment = '乒乓球';
-        if (deviceVariables.equipment_type === 1) {
-          currentEquipment = '跳绳';
-        } else if (deviceVariables.equipment_type === 2) {
-          currentEquipment = '篮球';
-        } else if (deviceVariables.equipment_type !== 0) {
-          currentEquipment = '未选择';
-        }
-        
-        // 更新器材显示：如果不同则添加新器材，用逗号分隔
-        if (!equipmentCell.textContent.includes(currentEquipment)) {
-          if (equipmentCell.textContent.trim() !== '') {
-            equipmentCell.textContent = equipmentCell.textContent + ', ' + currentEquipment;
-          } else {
-            equipmentCell.textContent = currentEquipment;
-          }
-        }
-        
-        // 更新使用时长
-        if (inProgress) {
-          // 如果是开始使用，显示"进行中"
-          durationCell.textContent = '进行中';
-          durationCell.style.color = '#007bff'; // 蓝色
-          durationCell.style.fontWeight = 'bold';
-        } else {
-          // 如果是结束使用，显示实际使用时长
-          durationCell.textContent = deviceVariables.use_time.toFixed(1);
-          durationCell.style.color = ''; // 恢复默认颜色
-          durationCell.style.fontWeight = '';
-        }
-        
-        // 更新总时长统计
-        updateTotalHours();
-      }
-      
-      function insertNewHistoryRecord(dateStr, inProgress) {
-        const historyTableBody = document.getElementById('history-table-body');
-        if (!historyTableBody) return null;
-        
-        if (!dateStr) dateStr = getCurrentDateString();
-        
-        // 检查是否已存在当天的记录
-        const existingRow = findTodayRow(historyTableBody, dateStr);
-        if (existingRow) {
-          updateHistoryRow(existingRow, inProgress);
-          return existingRow;
-        }
-        
-        // 获取当前器材名称
-        let equipment = '乒乓球';
-        if (deviceVariables.equipment_type === 1) {
-          equipment = '跳绳';
-        } else if (deviceVariables.equipment_type === 2) {
-          equipment = '篮球';
-        } else if (deviceVariables.equipment_type !== 0) {
-          equipment = '未选择';
-        }
-        
-        // 显示的使用时长
-        let displayTime = inProgress ? '进行中' : deviceVariables.use_time.toFixed(1);
-        
-        // 创建新记录行
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `<td>${dateStr}</td><td>${equipment}</td><td style="${inProgress ? 'color: #007bff; font-weight: bold;' : ''}">${displayTime}</td>`;
-        
-        // 插入到表格顶部
-        if (historyTableBody.firstChild) {
-          historyTableBody.insertBefore(newRow, historyTableBody.firstChild);
-        } else {
-          historyTableBody.appendChild(newRow);
-        }
-        
-        // 更新总时长统计
-        updateTotalHours();
-        return newRow;
-      }
-      
-      function updateTotalHours() {
-        const totalHoursElement = document.getElementById('total-year-hours');
-        if (!totalHoursElement) return;
-        
-        const hours = Array.from(document.querySelectorAll('#student-history tbody td:nth-child(3)'))
-          .map(td => td.textContent === '进行中' ? 0 : (parseFloat(td.textContent) || 0));
-        
-        const totalHours = hours.reduce((sum, hour) => sum + hour, 0);
-        totalHoursElement.textContent = totalHours.toFixed(1);
       }
       
       // 登录切换和验证
@@ -1904,8 +2075,10 @@
       }
       
       function login(userType) {
-        const username = document.getElementById(userType + '-username').value;
-        const password = document.getElementById(userType + '-password').value;
+        const usernameInput = document.getElementById(userType + '-username');
+        const passwordInput = document.getElementById(userType + '-password');
+        const username = usernameInput.value;
+        const password = passwordInput.value;
         
         const credentials = {
           student: {username: '210797', password: '210797'},
@@ -1917,31 +2090,53 @@
         let loginSuccess = false;
         let dashboardType = '';
         
-        if (userType === 'student' && username === credentials.student.username && 
-            password === credentials.student.password) {
-          loginSuccess = true;
-          dashboardType = 'student';
-          currentLogin.student = { username, password };
+        // 重置之前的计时器
+        if (window.timerInterval && window.timerInterval[username]) {
+          clearInterval(window.timerInterval[username]);
+          window.timerInterval[username] = null;
+        }
+        
+        if (userType === 'student') {
+          // 检查是否是其他学生账号（175905或175908）
+          if ((username === '175905' && password === '175905') || 
+              (username === '175908' && password === '175908')) {
+            loginSuccess = true;
+            dashboardType = 'student';
+            currentLogin.student = { username, password };
+          }
+          // 检查是否是210797账号
+          else if (username === credentials.student.username && 
+                   password === credentials.student.password) {
+            loginSuccess = true;
+            dashboardType = 'student';
+            currentLogin.student = { username, password };
+          }
         } 
-        else if (userType === 'teacher' && username === credentials.teacher.username && 
-            password === credentials.teacher.password) {
+        else if (userType === 'teacher' && 
+                 username === credentials.teacher.username && 
+                 password === credentials.teacher.password) {
           loginSuccess = true;
           dashboardType = 'teacher';
           currentLogin.teacher = { username, password };
-        } 
-        else if (credentials[username] && credentials[username].type === 'student' && 
-            credentials[username].password === password) {
-          loginSuccess = true;
-          dashboardType = 'student';
-          currentLogin.student = { username, password };
         }
         
         if (loginSuccess) {
+          // 更新student-username输入框的值为当前登录的账号
+          document.getElementById('student-username').value = username;
+          console.log('登录成功，当前用户名设置为:', username); // 添加调试日志
+          
           document.getElementById('login-section').classList.add('hidden');
           document.getElementById(dashboardType + '-dashboard').classList.remove('hidden');
           
           const firstMenuBtn = document.querySelector('#' + dashboardType + '-dashboard .menu-btn');
-          if (firstMenuBtn) firstMenuBtn.click();
+          if (firstMenuBtn) {
+            firstMenuBtn.click();
+          }
+          
+          // 重新生成历史记录
+          if (dashboardType === 'student') {
+            generateInitialHistoryRecords();
+          }
         } else {
           alert(userType === 'student' ? '学生账号或密码错误!' : '教师账号或密码错误!');
         }
@@ -1951,28 +2146,36 @@
       document.getElementById('teacher-logout').addEventListener('click', () => logout('teacher'));
       
       function logout(userType) {
+        // 清除当前用户的计时器
+        const currentUser = document.getElementById('student-username').value;
+        if (window.timerInterval && window.timerInterval[currentUser]) {
+          clearInterval(window.timerInterval[currentUser]);
+          window.timerInterval[currentUser] = null;
+        }
+        
         document.getElementById(userType + '-dashboard').classList.add('hidden');
         document.getElementById('login-section').classList.remove('hidden');
         
         if (userType === 'student') {
           document.getElementById('student-tab').click();
-          document.getElementById('student-username').value = currentLogin.student.username;
-          document.getElementById('student-password').value = currentLogin.student.password;
+          // 重置为默认账号
+          document.getElementById('student-username').value = '210797';
+          document.getElementById('student-password').value = '210797';
         } else {
           document.getElementById('teacher-tab').click();
           document.getElementById('teacher-username').value = currentLogin.teacher.username;
           document.getElementById('teacher-password').value = currentLogin.teacher.password;
         }
+        
+        console.log('退出登录，重置为默认账号'); // 添加调试日志
       }
 
       // 设备状态和控制
       let deviceStatus = {
         isLocked1: true,
         isLocked2: true,
-        isLocked3: true,
         lastUpdateTime1: '',
-        lastUpdateTime2: '',
-        lastUpdateTime3: ''
+        lastUpdateTime2: ''
       };
       
       async function queryDeviceStatus() {
@@ -2004,7 +2207,6 @@
             
             const lock1Property = properties.find(prop => prop.identifier === 'Lock1');
             const lock2Property = properties.find(prop => prop.identifier === 'Lock2');
-            const lock3Property = properties.find(prop => prop.identifier === 'Lock3');
             
             if (lock1Property) {
               deviceStatus.isLocked1 = convertToBoolean(lock1Property.value);
@@ -2018,12 +2220,6 @@
               updateLockDisplay(2, deviceStatus.isLocked2, deviceStatus.lastUpdateTime2);
             }
             
-            if (lock3Property) {
-              deviceStatus.isLocked3 = convertToBoolean(lock3Property.value);
-              deviceStatus.lastUpdateTime3 = currentTime;
-              updateLockDisplay(3, deviceStatus.isLocked3, deviceStatus.lastUpdateTime3);
-            }
-            
             return true;
           } else {
             throw new Error(data.error || data.msg || '查询失败');
@@ -2032,7 +2228,6 @@
           console.error('查询设备状态失败:', error);
           document.getElementById('lock1-status').textContent = '门1状态: 查询出错';
           document.getElementById('lock2-status').textContent = '门2状态: 查询出错';
-          document.getElementById('lock3-status').textContent = '门3状态: 查询出错';
           return false;
         }
       }
@@ -2095,12 +2290,6 @@
         const currentLockStatus = deviceVariables.Lock2 || deviceStatus.isLocked2;
         const newLockStatus = !currentLockStatus;
         await setDeviceLockStatus(2, newLockStatus);
-      });
-      
-      document.getElementById('door3-toggle').addEventListener('click', async () => {
-        const currentLockStatus = deviceVariables.Lock3 || deviceStatus.isLocked3;
-        const newLockStatus = !currentLockStatus;
-        await setDeviceLockStatus(3, newLockStatus);
       });
       
       // 二维码加载
@@ -2194,17 +2383,6 @@
           box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
         }
         
-        .total-hours {
-          font-size: 18px;
-          font-weight: 500;
-          color: var(--primary-color);
-          margin: 15px 0;
-          padding: 10px;
-          border-radius: 8px;
-          background-color: var(--primary-light);
-          display: inline-block;
-        }
-        
         #qrcode-image, #teacher-qrcode-image {
           transition: transform 0.3s ease;
         }
@@ -2221,7 +2399,228 @@
         }
       `;
       document.head.appendChild(styleElement);
+
+      // 测试use_flag逻辑
+      function testUseFlagLogic() {
+        console.log('=== 测试use_flag逻辑 ===');
+        const testCases = [
+          { use_flag: 100, account: '210797', expected: true },
+          { use_flag: 0, account: '210797', expected: false },
+          { use_flag: 10, account: '175905', expected: true },
+          { use_flag: 0, account: '175905', expected: false },
+          { use_flag: 1, account: '175908', expected: true },
+          { use_flag: 0, account: '175908', expected: false },
+          { use_flag: 111, account: '210797', expected: true },
+          { use_flag: 111, account: '175905', expected: true },
+          { use_flag: 111, account: '175908', expected: true }
+        ];
+
+        testCases.forEach(test => {
+          const result = getUserUseFlag(test.use_flag, test.account);
+          console.log(`测试: use_flag=${test.use_flag}, account=${test.account}`);
+          console.log(`期望结果: ${test.expected}, 实际结果: ${result}`);
+          console.log(`测试${result === test.expected ? '通过' : '失败'}`);
+        });
+      }
+
+      // 添加测试函数
+      function testEquipmentTypeLogic() {
+        console.log('=== 测试equipment_type逻辑 ===');
+        const testCases = [
+          { equipment_type: 0, account: '210797', expected: '篮球' },
+          { equipment_type: 100, account: '210797', expected: '跳绳' },
+          { equipment_type: 200, account: '210797', expected: '乒乓球' },
+          { equipment_type: 300, account: '210797', expected: '未选择' },
+          { equipment_type: 0, account: '175905', expected: '篮球' },
+          { equipment_type: 10, account: '175905', expected: '跳绳' },
+          { equipment_type: 20, account: '175905', expected: '乒乓球' },
+          { equipment_type: 30, account: '175905', expected: '未选择' },
+          { equipment_type: 0, account: '175908', expected: '篮球' },
+          { equipment_type: 1, account: '175908', expected: '跳绳' },
+          { equipment_type: 2, account: '175908', expected: '乒乓球' },
+          { equipment_type: 3, account: '175908', expected: '未选择' },
+          { equipment_type: 111, account: '210797', expected: '跳绳' },
+          { equipment_type: 111, account: '175905', expected: '跳绳' },
+          { equipment_type: 111, account: '175908', expected: '跳绳' }
+        ];
+
+        testCases.forEach(test => {
+          const result = getUserEquipmentType(test.equipment_type, test.account);
+          console.log(`测试: equipment_type=${test.equipment_type}, account=${test.account}`);
+          console.log(`期望结果: ${test.expected}, 实际结果: ${result}`);
+          console.log(`测试${result === test.expected ? '通过' : '失败'}`);
+        });
+      }
+
+      // 在页面加载完成后运行测试
+      document.addEventListener('DOMContentLoaded', function() {
+        // 初始化暗黑模式
+        initDarkMode();
+
+        // 运行use_flag逻辑测试
+        testUseFlagLogic();
+        
+        // 运行equipment_type逻辑测试
+        testEquipmentTypeLogic();
+
+        // ... 其他初始化代码 ...
+      });
+
+      // 添加清除历史记录功能
+      document.getElementById('clear-history-btn').addEventListener('click', function() {
+        if (confirm('确定要清除所有历史记录吗？此操作不可恢复。')) {
+          // 获取当前用户
+          const currentUser = document.getElementById('student-username').value;
+          const storageKey = `history_${currentUser}`;
+          
+          // 只清除当前用户的历史记录
+          localStorage.removeItem(storageKey);
+          
+          // 清空表格显示
+          const historyTableBody = document.getElementById('history-table-body');
+          if (historyTableBody) {
+            historyTableBody.innerHTML = '';
+          }
+          
+          alert('历史记录已清除');
+        }
+      });
+
+      // 添加更新历史记录的函数
+      function updateHistoryWithTime(account, useTime) {
+        console.log(`更新历史记录 - 账号: ${account}, 使用时长: ${useTime}秒`); // 添加调试日志
+        
+        const currentDateStr = getCurrentDateString();
+        const storageKey = `history_${account}`;
+        
+        // 获取该账号的历史记录
+        const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        console.log(`当前历史记录 - 账号: ${account}`, userRecords); // 添加调试日志
+        
+        // 查找当天记录
+        let recordIndex = userRecords.findIndex(r => r.date === currentDateStr);
+        if (recordIndex !== -1) {
+          // 如果已有记录，累加使用时长
+          const prevDuration = parseInt(userRecords[recordIndex].duration) || 0;
+          const newDuration = prevDuration + useTime;
+          userRecords[recordIndex].duration = newDuration.toString();
+          console.log(`更新现有记录 - 之前时长: ${prevDuration}秒, 新增时长: ${useTime}秒, 总时长: ${newDuration}秒`);
+        } else {
+          // 创建新记录
+          userRecords.unshift({
+            date: currentDateStr,
+            equipment: getUserEquipmentType(deviceVariables.equipment_type, account),
+            duration: useTime.toString()
+          });
+          console.log(`创建新记录 - 日期: ${currentDateStr}, 时长: ${useTime}秒`);
+        }
+        
+        // 写回localStorage
+        localStorage.setItem(storageKey, JSON.stringify(userRecords));
+        console.log(`保存历史记录 - 账号: ${account}`, userRecords);
+        
+        // 如果当前登录账号等于account，刷新表格
+        if(document.getElementById('student-username').value === account) {
+          console.log(`刷新显示 - 当前登录账号: ${account}`);
+          generateInitialHistoryRecords();
+        }
+      }
     });
+
+    // ... existing code ...
+    // 放在<script>标签内最前面
+    function formatDuration(sec){sec=parseInt(sec);if(sec<60)return sec+'秒';return Math.floor(sec/60)+'分'+(sec%60)+'秒';}
+    // ... existing code ...
+    // 保证generateInitialHistoryRecords结构完整
+    function generateInitialHistoryRecords() {
+      const historyTableBody = document.getElementById('history-table-body');
+      if (!historyTableBody) return;
+      
+      // 清空现有记录
+      historyTableBody.innerHTML = '';
+      
+      // 获取当前登录的用户账号
+      const currentUser = document.getElementById('student-username').value;
+      console.log('生成历史记录 - 当前登录账号:', currentUser); // 添加调试日志
+      
+      // 确保currentUser是有效的账号
+      if (!['210797', '175905', '175908'].includes(currentUser)) {
+        console.error('无效的用户账号:', currentUser);
+        return;
+      }
+      
+      // 从本地存储加载当前用户的历史记录
+      const storageKey = `history_${currentUser}`;
+      console.log('使用的存储键:', storageKey); // 添加调试日志
+      
+      const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      console.log(`加载${currentUser}的历史记录:`, userRecords); // 添加调试日志
+      
+      // 显示当前用户的记录
+      userRecords.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${record.date}</td><td>${record.equipment}</td><td>${isNaN(record.duration)?record.duration:formatDuration(record.duration)}</td>`;
+        historyTableBody.appendChild(row);
+      });
+    }
+    // ... existing code ...
+    // 保证updateHistoryRow结构完整
+    function updateHistoryRow(row, isOngoing, useTimeSec) {
+      const currentUser = document.getElementById('student-username').value;
+      const storageKey = `history_${currentUser}`; // 使用独立的存储键
+      const date = row.cells[0].textContent;
+      const userRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const recordIndex = userRecords.findIndex(r => r.date === date);
+      
+      if (recordIndex !== -1) {
+        if (isOngoing) {
+          userRecords[recordIndex].duration = '进行中';
+          row.cells[2].textContent = '进行中';
+        } else {
+          let prev = parseInt(userRecords[recordIndex].rawSeconds || 0);
+          let now = parseInt(useTimeSec || 0);
+          if (userRecords[recordIndex].duration !== '进行中') now += prev;
+          userRecords[recordIndex].rawSeconds = now;
+          userRecords[recordIndex].duration = formatDuration(now);
+          row.cells[2].textContent = userRecords[recordIndex].duration;
+          
+          // 器材类型追加逻辑
+          let eq = getUserEquipmentType(deviceVariables.equipment_type, currentUser);
+          let eqs = userRecords[recordIndex].equipment.split(',');
+          if(!eqs.includes(eq)) {
+            userRecords[recordIndex].equipment += ',' + eq;
+            row.cells[1].textContent = userRecords[recordIndex].equipment;
+          }
+        }
+        
+        // 保存回本地存储
+        localStorage.setItem(storageKey, JSON.stringify(userRecords));
+      }
+    }
+    // ... existing code ...
+    function formatTotalDuration(sec){sec=parseInt(sec)||0;let h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;let str='';if(h)str+=h+'小时';if(m||h)str+=m+'分钟';str+=s+'秒';return str;}
+    function updateTotalHours(userId) {
+      const totalHoursElement = document.getElementById('total-year-hours');
+      if (!totalHoursElement) return;
+      const userRecords = JSON.parse(localStorage.getItem(`history_${userId}`) || '[]');
+      let totalSeconds = 0;
+      userRecords.forEach(r=>{totalSeconds += parseInt(r.rawSeconds||0);});
+      totalHoursElement.textContent = formatTotalDuration(totalSeconds);
+    }
+    // 删除选中异常记录
+    document.getElementById('delete-exception-btn').onclick=function(){
+      let sel=document.querySelectorAll('.exception-select:checked');
+      if(!sel.length)return alert('请先选择要删除的记录');
+      if(!confirm('确定要删除选中记录吗？'))return;
+      let records=getExceptionRecords();
+      sel.forEach(box=>{
+        let id=box.getAttribute('data-id'),date=box.getAttribute('data-date');
+        let idx=records.findIndex(r=>r.accountId==id&&r.date==date);
+        if(idx>-1)records.splice(idx,1);
+      });
+      localStorage.setItem('exceptionRecords',JSON.stringify(records));
+      updateExceptionTableDisplay();
+    }
   </script>
 </body>
 </html>
