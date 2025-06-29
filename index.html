@@ -657,32 +657,6 @@
       }
     }
     
-    /* 搜索框样式 */
-    .search-container {
-      margin: 15px 0 25px;
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    .search-input {
-      width: 100%;
-      max-width: 300px;
-      padding: 12px 18px;
-      border: 1px solid var(--border-color);
-      border-radius: 30px;
-      font-size: 15px;
-      transition: all 0.3s ease;
-      background-color: var(--light-color);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    
-    .search-input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-      transform: translateY(-2px);
-    }
-    
     /* 实时状态显示样式 */
     .status-display {
       margin: 20px 0;
@@ -1009,6 +983,9 @@
       display: table-cell;
       width: 40px;
     }
+
+    .qrcode-image{display:flex;justify-content:center;align-items:center;margin:0 auto;width:200px;height:200px;}
+    .qrcode-container{text-align:center;}
   </style>
 </head>
 <body>
@@ -1023,7 +1000,7 @@
     <!-- 登录界面 -->
     <div id="login-section" class="card">
       <div class="branding">
-        <div class="branding-future">2025共创芯未来</div>
+        <div class="branding-future">2025嵌入式大赛</div>
         <h1 class="branding-title">校园运动器材管理系统</h1>
       </div>
       <div class="login-tabs">
@@ -1059,7 +1036,7 @@
     <!-- 学生功能界面 -->
     <div id="student-dashboard" class="card hidden">
       <div class="branding">
-        <div class="branding-future">2025共创芯未来</div>
+        <div class="branding-future">2025嵌入式大赛</div>
         <h1 class="branding-title">校园运动器材管理系统</h1>
       </div>
       <h2>学生功能界面</h2>
@@ -1116,9 +1093,7 @@
         <h2>学生二维码</h2>
         <div class="qrcode-container">
           <p class="qrcode-title">个人识别二维码</p>
-          <div class="qrcode-image-container">
-            <img id="qrcode-image" alt="学生二维码" class="qrcode-image">
-          </div>
+          <div id="qrcode-image" class="qrcode-image"></div>
           <p class="qrcode-hint">请在设备前出示此二维码</p>
         </div>
       </div>
@@ -1127,7 +1102,7 @@
     <!-- 教师功能界面 -->
     <div id="teacher-dashboard" class="card hidden">
       <div class="branding">
-        <div class="branding-future">2025共创芯未来</div>
+        <div class="branding-future">2025嵌入式大赛</div>
         <h1 class="branding-title">校园运动器材管理系统</h1>
       </div>
       <h2>教师功能界面</h2>
@@ -1158,9 +1133,6 @@
       <!-- 异常处理界面 -->
       <div id="teacher-exception" class="tab-panel">
         <h2>归还超时记录</h2>
-        <div class="search-container">
-          <input type="text" id="exception-search" placeholder="搜索..." class="search-input">
-        </div>
         <div style="margin-bottom:10px;display:flex;justify-content:flex-end"><button id="delete-exception-btn" style="background:#dc3545;color:#fff;border:none;border-radius:18px;padding:4px 14px;font-size:13px;box-shadow:0 2px 8px #dc354533;cursor:pointer;transition:all .2s;display:inline-block;min-width:auto;width:auto;">删除选中记录</button></div>
         <!-- 添加错误标志显示区域 -->
         <div class="status-display">
@@ -1207,9 +1179,7 @@
         <h2>教师二维码</h2>
         <div class="qrcode-container">
           <p class="qrcode-title">教师识别二维码</p>
-          <div class="qrcode-image-container">
-            <img id="teacher-qrcode-image" alt="教师二维码" class="qrcode-image">
-          </div>
+          <div id="teacher-qrcode-image" class="qrcode-image"></div>
           <p class="qrcode-hint">请在设备前出示此二维码</p>
         </div>
       </div>
@@ -1662,7 +1632,7 @@
         return result;
       }
 
-      // 根据账号和equipment_type获取对应的器材类型
+      // 根据账号和equipment_type获取对应的器材类型（教师界面使用）
       function getUserEquipmentType(equipment_type, error_flag) {
         console.log('当前equipment_type值:', equipment_type); 
         console.log('当前错误标志:', error_flag); 
@@ -1673,6 +1643,46 @@
         
         // 根据错误标志选择不同的位数
         switch(error_flag) {
+          case '210797':
+            digit = Math.floor(equipment_type / 100) % 10; // 获取百位
+            console.log('210797账号百位值:', digit);
+            break;
+          case '175905':
+            digit = Math.floor((equipment_type % 100) / 10); // 获取十位
+            console.log('175905账号十位值:', digit);
+            break;
+          case '175908':
+            digit = equipment_type % 10; // 获取个位
+            console.log('175908账号个位值:', digit);
+            break;
+          default:
+            return '未选择';
+        }
+        
+        // 根据数字返回对应的器材类型
+        switch(digit) {
+          case 0:
+            return '篮球';
+          case 1:
+            return '跳绳';
+          case 2:
+            return '乒乓球';
+          default:
+            return '未选择';
+        }
+      }
+
+      // 根据账号和equipment_type获取对应的器材类型（学生界面使用）
+      function getStudentEquipmentType(equipment_type, account) {
+        console.log('学生界面 - 当前equipment_type值:', equipment_type); 
+        console.log('学生界面 - 当前账号:', account); 
+        
+        let digit = 0;
+        // 确保equipment_type是数字类型
+        equipment_type = parseInt(equipment_type);
+        
+        // 根据账号选择不同的位数
+        switch(account) {
           case '210797':
             digit = Math.floor(equipment_type / 100) % 10; // 获取百位
             console.log('210797账号百位值:', digit);
@@ -1792,11 +1802,11 @@
               // 更新器材类型显示
               const equipmentTypeDisplay = document.getElementById('current-student-equipment-type');
               if (equipmentTypeDisplay) {
-                // 获取当前错误标志
-                const currentErrorFlag = deviceVariables.错误标志.toString();
+                // 获取当前用户账号
+                const currentUser = document.getElementById('student-username').value;
                 
-                // 根据当前错误标志获取对应的器材类型
-                const equipmentName = getUserEquipmentType(deviceVariables.equipment_type, currentErrorFlag);
+                // 根据当前用户账号获取对应的器材类型
+                const equipmentName = getStudentEquipmentType(deviceVariables.equipment_type, currentUser);
                 console.log('计算得到的器材类型:', equipmentName);
                 
                 equipmentTypeDisplay.textContent = equipmentName;
@@ -2402,15 +2412,11 @@
       
       // 二维码加载
       function loadStudentQRCode() {
-        const studentUsername = document.getElementById('student-username').value || '210797';
-        document.getElementById('qrcode-image').src = 
-          `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${studentUsername}`;
+        let u=document.getElementById('student-username').value||'210797',c=document.getElementById('qrcode-image');c.innerHTML='';new QRCode(c,{text:u,width:200,height:200});
       }
 
       function loadTeacherQRCode() {
-        const teacherUsername = document.getElementById('teacher-username').value || '359921';
-        document.getElementById('teacher-qrcode-image').src = 
-          `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${teacherUsername}`;
+        let u=document.getElementById('teacher-username').value||'359921',c=document.getElementById('teacher-qrcode-image');c.innerHTML='';new QRCode(c,{text:u,width:200,height:200});
       }
 
       // 更新门锁状态显示
@@ -2644,7 +2650,7 @@
           // 创建新记录
           userRecords.unshift({
             date: currentDateStr,
-            equipment: getUserEquipmentType(deviceVariables.equipment_type, account),
+            equipment: getStudentEquipmentType(deviceVariables.equipment_type, account),
             duration: useTime.toString()
           });
           console.log(`创建新记录 - 日期: ${currentDateStr}, 时长: ${useTime}秒`);
@@ -2717,6 +2723,68 @@
           }
         });
       }
+
+      // ... existing code ...
+      // 运行测试用例
+      function runTests() {
+        console.log('=== 测试equipment_type逻辑 ===');
+        // 测试用例
+        const equipmentTypeTests = [
+          // 学生界面测试用例
+          { equipment_type: 0, account: '210797', expected: '篮球', isStudent: true },
+          { equipment_type: 100, account: '210797', expected: '跳绳', isStudent: true },
+          { equipment_type: 200, account: '210797', expected: '乒乓球', isStudent: true },
+          { equipment_type: 300, account: '210797', expected: '未选择', isStudent: true },
+          { equipment_type: 0, account: '175905', expected: '篮球', isStudent: true },
+          { equipment_type: 10, account: '175905', expected: '跳绳', isStudent: true },
+          { equipment_type: 20, account: '175905', expected: '乒乓球', isStudent: true },
+          { equipment_type: 30, account: '175905', expected: '未选择', isStudent: true },
+          { equipment_type: 0, account: '175908', expected: '篮球', isStudent: true },
+          { equipment_type: 1, account: '175908', expected: '跳绳', isStudent: true },
+          { equipment_type: 2, account: '175908', expected: '乒乓球', isStudent: true },
+          { equipment_type: 3, account: '175908', expected: '未选择', isStudent: true },
+          { equipment_type: 111, account: '210797', expected: '跳绳', isStudent: true },
+          { equipment_type: 111, account: '175905', expected: '跳绳', isStudent: true },
+          { equipment_type: 111, account: '175908', expected: '跳绳', isStudent: true },
+          
+          // 教师界面测试用例
+          { equipment_type: 0, error_flag: '210797', expected: '篮球', isStudent: false },
+          { equipment_type: 100, error_flag: '210797', expected: '跳绳', isStudent: false },
+          { equipment_type: 200, error_flag: '210797', expected: '乒乓球', isStudent: false },
+          { equipment_type: 300, error_flag: '210797', expected: '未选择', isStudent: false },
+          { equipment_type: 0, error_flag: '175905', expected: '篮球', isStudent: false },
+          { equipment_type: 10, error_flag: '175905', expected: '跳绳', isStudent: false },
+          { equipment_type: 20, error_flag: '175905', expected: '乒乓球', isStudent: false },
+          { equipment_type: 30, error_flag: '175905', expected: '未选择', isStudent: false },
+          { equipment_type: 0, error_flag: '175908', expected: '篮球', isStudent: false },
+          { equipment_type: 1, error_flag: '175908', expected: '跳绳', isStudent: false },
+          { equipment_type: 2, error_flag: '175908', expected: '乒乓球', isStudent: false },
+          { equipment_type: 3, error_flag: '175908', expected: '未选择', isStudent: false }
+        ];
+        
+        let passCount = 0;
+        let failCount = 0;
+        
+        equipmentTypeTests.forEach(test => {
+          const result = test.isStudent ? 
+            getStudentEquipmentType(test.equipment_type, test.account) :
+            getUserEquipmentType(test.equipment_type, test.error_flag);
+            
+          console.log(`测试: ${test.isStudent ? '学生界面' : '教师界面'}, equipment_type=${test.equipment_type}, ${test.isStudent ? 'account' : 'error_flag'}=${test.isStudent ? test.account : test.error_flag}`);
+          console.log(`期望: ${test.expected}, 实际: ${result}`);
+          
+          if (result === test.expected) {
+            console.log('✓ 测试通过');
+            passCount++;
+          } else {
+            console.log('✗ 测试失败');
+            failCount++;
+          }
+          console.log('---');
+        });
+        
+        console.log(`测试完成: ${passCount}个通过, ${failCount}个失败`);
+      }
     });
 
     // ... existing code ...
@@ -2777,7 +2845,7 @@
           row.cells[2].textContent = userRecords[recordIndex].duration;
           
           // 器材类型追加逻辑
-          let eq = getUserEquipmentType(deviceVariables.equipment_type, currentUser);
+          let eq = getStudentEquipmentType(deviceVariables.equipment_type, currentUser);
           let eqs = userRecords[recordIndex].equipment.split(',');
           if(!eqs.includes(eq)) {
             userRecords[recordIndex].equipment += ',' + eq;
@@ -2814,5 +2882,7 @@
       updateExceptionTableDisplay();
     }
   </script>
+  <!-- 引入本地二维码库 -->
+  <script src="qrcode.min.js"></script>
 </body>
 </html>
