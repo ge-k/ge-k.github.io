@@ -1117,15 +1117,12 @@
       <div id="teacher-door" class="tab-panel">
         <h2>开关门柜管理</h2>
         <div class="door-control">
-          <button id="door1-toggle" class="door-btn">加载中...</button>
           <button id="door2-toggle" class="door-btn">加载中...</button>
         </div>
         
         <div class="device-info">
           <h3>设备状态</h3>
-          <p class="result" id="lock1-status">门1状态: 查询中...</p>
-          <p class="result" id="lock1-update-time">最后更新时间: 查询中...</p>
-          <p class="result" id="lock2-status">门2状态: 查询中...</p>
+          <p class="result" id="lock1-status">门2状态: 查询中...</p>
           <p class="result" id="lock2-update-time">最后更新时间: 查询中...</p>
         </div>
       </div>
@@ -2398,11 +2395,6 @@
         }
       }
       
-      document.getElementById('door1-toggle').addEventListener('click', async () => {
-        const currentLockStatus = deviceVariables.Lock1 || deviceStatus.isLocked1;
-        const newLockStatus = !currentLockStatus;
-        await setDeviceLockStatus(1, newLockStatus);
-      });
       
       document.getElementById('door2-toggle').addEventListener('click', async () => {
         const currentLockStatus = deviceVariables.Lock2 || deviceStatus.isLocked2;
