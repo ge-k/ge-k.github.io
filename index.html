@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 客户端</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>WebSocket 客户端</h1>
+    <div class="connection-settings">
+        <label for="serverAddress">服务器地址:</label>
+        <input type="text" id="serverAddress" value="ws://localhost:8080">
+        <button id="connectButton">连接</button>
+        <button id="disconnectButton" disabled>断开</button>
+    </div>
+    <div class="message-input">
+        <input type="text" id="messageInput" placeholder="输入消息" disabled>
+        <button id="sendButton" disabled>发送</button>
+    </div>
+    <div class="messages">
+        <h2>消息列表:</h2>
+        <ul id="messagesList"></ul>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
